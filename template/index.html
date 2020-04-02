@@ -2,19 +2,19 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+  <link rel="stylesheet" href="style.css">
   <script type="text/javascript" src="modules.js"></script>
   <title>Sample</title>
 </head>
-<body>
-  <div class="a" id="a1">Element</div>
-  <div class="b" id="b1">Node</div>
-  <div class="c" id="c1">Field</div>
-  <script type="text/javascript">
-    draggable(document.getElementById('a1'));
-    draggable(document.getElementById('b1'));
-    draggable(document.getElementById('c1'));
-  </script>
+<body class="bg-dark">
+  <button type="GenerateMesh" class="btn btn-success btn-lg">Mesh</button>
+  <button type="DeleteMesh" class="btn btn-danger btn-lg">Delete</button>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-6 bg-secondary"><canvas id="gsiiotafield"></canvas></div>
+      <div class="col-sm-6 bg-success"><canvas id="xyfield"></canvas></div>
+    </div>
+  </div>
 </body> 
 </html>
