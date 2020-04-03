@@ -5,6 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+  <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <title>MappedPAN</title>
 </head>
@@ -17,7 +18,7 @@
       <div class="col-sm-6 card bg-dark border-white">
         <div class="card-header border-info text-white">ξ-η Coordinate</div>
         <div class="card-body">
-          <div id="containerxiita">
+          <div id="containerxiita" class="container-canvas">
             <canvas id="canvasxiita"></canvas>
           </div>
         </div>
@@ -41,13 +42,16 @@
       <div class="col-sm-6 card bg-dark border-info">
         <div class="card-header border-info text-white">x-y Coordinate</div>
         <div class="card-body">
-          <div id="containerxiita">
-            <canvas id="canvasxiita"></canvas>
+          <div id="containerxy" class="container-canvas">
+            <canvas id="canvasxy"></canvas>
           </div>
         </div>
         <div class="card-footer border-info">
+          <i class="fas fa-slash text-white"></i>
+          <i class="far fa-circle text-white"></i>
+         
           <button type="ConvertMesh" class="btn btn-success">Convert</button>
-          <button type="DeleteMesh" class="btn btn-danger">Delete</button>
+          <button type="ExportMesh" class="btn btn-white">Export</button>
         </div>
       </div>
     </div>

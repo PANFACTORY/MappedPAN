@@ -3,11 +3,15 @@ const canvasxiita = document.getElementById('canvasxiita');
 const ctxxiita = canvasxiita.getContext('2d');
 const inputnxi = document.getElementById('inputnxi');
 const inputnita = document.getElementById('inputnita');
+const containerxy = document.getElementById('containerxy');
+const canvasxy = document.getElementById('canvasxy');
+const ctxxy = canvasxy.getContext('2d');
 
 
 inputnxi.addEventListener('change', updatenxiita);
 inputnita.addEventListener('change', updatenxiita);
 window.addEventListener('resize', resizewindow, false);
+canvasxy.addEventListener('click', drawxy);
 
 
 function updatenxiita(){
@@ -65,9 +69,20 @@ function updatenxiita(){
 }
 
 
+function drawxy(e){
+    var rect = e.target.getBoundingClientRect();
+    var x = e.clientX - Math.floor(rect.left);
+    var y = e.clientY - Math.floor(rect.top);
+}
+
+
 function resizewindow(){
     canvasxiita.width = containerxiita.clientWidth;
     canvasxiita.height = containerxiita.clientHeight;
+    
+    canvasxy.width = containerxy.clientWidth;
+    canvasxy.height = containerxy.clientHeight;
+    
     updatenxiita();
 }
 
