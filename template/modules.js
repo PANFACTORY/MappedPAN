@@ -6,7 +6,7 @@ const canvasxy = acgraph.create('canvasxy');
 
 inputnxi.addEventListener('change', updatenxiita);
 inputnita.addEventListener('change', updatenxiita);
-
+window.addEventListener('resize', resizewindow, false);
 canvasxy.addEventListener('click', drawxy);
 
 
@@ -64,6 +64,12 @@ function updatenxiita(){
 }
 
 
+function resizewindow(){
+    canvasxiita.resize(document.getElementById('canvasxiita').parentNode.clientWidth, document.getElementById('canvasxiita').parentNode.clientHeight);
+    updatenxiita();
+}
+
+
 function drawxy(e){
     var rect = e.target.getBoundingClientRect();
     var x = e.clientX - Math.floor(rect.left);
@@ -71,7 +77,4 @@ function drawxy(e){
 }
 
 
-updatenxiita();
-
- 
-//resizewindow();
+resizewindow();
