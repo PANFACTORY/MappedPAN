@@ -42,28 +42,22 @@ function updatenxiita(){
     canvasxiita.path()
         .moveTo(10, canvasxiita.height() - 15)
         .lineTo(50, canvasxiita.height() - 15)
+        .stroke('red');
+    canvasxiita.path()
         .moveTo(10, canvasxiita.height() - 15)
         .lineTo(10, canvasxiita.height() - 55)
-        .stroke('white');
-    cordinatetextstle = {fontFamily: 'Times New Roman', fontSize: '15px', color: 'white'};
-    canvasxiita.text(55, canvasxiita.height() - 25, "ξ", cordinatetextstle);
-    canvasxiita.text(5, canvasxiita.height() - 75, "η", cordinatetextstle);
+        .stroke('yellow');
+    cordinatexitextstyle = {fontFamily: 'Times New Roman', fontSize: '15px', color: 'white'};
+    canvasxiita.text(55, canvasxiita.height() - 25, "ξ", cordinatexitextstyle);
+    cordinateitatextstyle = {fontFamily: 'Times New Roman', fontSize: '15px', color: 'white'};
+    canvasxiita.text(5, canvasxiita.height() - 75, "η", cordinateitatextstyle);
 
-
-    //----------Draw text----------
-/*    ctxxiita.fillStyle = "white";
-    ctxxiita.font = "15px 'Times New Roman'";
-    ctxxiita.textAlign = "left";
-    ctxxiita.textBaseline = "top";
-    ctxxiita.fillText("0", offsetxi, Number(inputnita.value)*delta + offsetita);
-    ctxxiita.fillText("1", Number(inputnxi.value)*delta + offsetxi, Number(inputnita.value)*delta + offsetita);
-    ctxxiita.fillText("2", Number(inputnxi.value)*delta + offsetxi, offsetita);
-    ctxxiita.fillText("3", offsetxi, offsetita);
-
-    ctxxiita.font = "15px 'Times New Roman'";
-    ctxxiita.fillText("ξ", 55, canvasxiita.height - 25);
-    ctxxiita.fillText("η", 5, canvasxiita.height - 70);
-*/
+    //----------Draw point marker----------
+    pointmarkertextstyle = {fontFamily: 'Times New Roman', fontSize: '15px', color: 'lightsalmon'};
+    canvasxiita.text(offsetxi - 10, Number(inputnita.value)*delta + offsetita, '0', pointmarkertextstyle);
+    canvasxiita.text(Number(inputnxi.value)*delta + offsetxi + 5, Number(inputnita.value)*delta + offsetita, '1', pointmarkertextstyle);
+    canvasxiita.text(Number(inputnxi.value)*delta + offsetxi + 5, offsetita - 10, '2', pointmarkertextstyle);
+    canvasxiita.text(offsetxi - 10, offsetita - 10, '3', pointmarkertextstyle);
 }
 
 
