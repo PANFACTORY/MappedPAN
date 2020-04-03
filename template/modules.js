@@ -39,16 +39,19 @@ function updatenxiita(){
     }
 
     //----------Draw coordinate----------
-/*    ctxxiita.strokeStyle = "white";
-    ctxxiita.moveTo(10, canvasxiita.height - 10);
-    ctxxiita.lineTo(50, canvasxiita.height - 10);
-    ctxxiita.moveTo(10, canvasxiita.height - 10);
-    ctxxiita.lineTo(10, canvasxiita.height - 50);
+    canvasxiita.path()
+        .moveTo(10, canvasxiita.height() - 15)
+        .lineTo(50, canvasxiita.height() - 15)
+        .moveTo(10, canvasxiita.height() - 15)
+        .lineTo(10, canvasxiita.height() - 55)
+        .stroke('white');
+    cordinatetextstle = {fontFamily: 'Times New Roman', fontSize: '15px', color: 'white'};
+    canvasxiita.text(55, canvasxiita.height() - 25, "ξ", cordinatetextstle);
+    canvasxiita.text(5, canvasxiita.height() - 75, "η", cordinatetextstle);
 
-    ctxxiita.stroke();
 
     //----------Draw text----------
-    ctxxiita.fillStyle = "white";
+/*    ctxxiita.fillStyle = "white";
     ctxxiita.font = "15px 'Times New Roman'";
     ctxxiita.textAlign = "left";
     ctxxiita.textBaseline = "top";
