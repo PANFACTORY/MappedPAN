@@ -1,27 +1,55 @@
 <!DOCTYPE html>
 <html>
+
+
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
   <link rel="stylesheet" href="style.css">
   <script type="text/javascript" src="modules.js"></script>
-  <title>Sample</title>
+  <title>MappedPAN</title>
 </head>
-<body class="bg-dark">
-  <button type="GenerateMesh" class="btn btn-success btn-lg">Mesh</button>
-  <button type="DeleteMesh" class="btn btn-danger btn-lg">Delete</button>
 
+
+<body>
   <div class="container-fluid">
     <div class="row">
-      <div class="col-sm-6 bg-secondary card">
+      <!----------ξ-η座標系入力部分---------->
+      <div class="col-sm-6 card">
+        <div class="card-header">ξ-η Coordinate</div>
         <div class="card-body">
-          テキストサンプル
+          ξ-η座標系
         </div>
-        
-        
+        <div class="card-footer">
+          <form>
+            <div class="form-row">
+              <div class="form-group col-sm-6">
+                <label for="inputnxi">nξ</label>
+                <input type="number" class="form-control" id="inputnxi" placeholder="1" min="1" required>
+              </div>
+              <div class="form-group col-sm-6">
+                <label for="inputnita">nη</label>
+                <input type="number" class="form-control" id="inputnita" placeholder="1" min="1" required>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
-      <div class="col-sm-6 bg-success"><canvas id="xyfield"></canvas></div>
+
+      <!----------x-y座標系入力部分---------->
+      <div class="col-sm-6 card">
+        <div class="card-header">x-y Coordinate</div>
+        <div class="card-body">
+          x-y座標系
+        </div>
+        <div class="card-footer">
+          <button type="GenerateMesh" class="btn btn-success">Mesh</button>
+          <button type="DeleteMesh" class="btn btn-danger">Delete</button>
+        </div>
+      </div>
     </div>
   </div>
-</body> 
+</body>
+
+
 </html>
