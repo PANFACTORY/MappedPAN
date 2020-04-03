@@ -24,6 +24,7 @@ app.on('ready', function() {
   // メイン画面の表示。ウィンドウの幅、高さを指定できる
   mainWindow = new BrowserWindow({width: 800, height: 600});
   mainWindow.setMenu(null);   //  Delete Menu bar
+  mainWindow.openDevTools();  //  Open developper tool
   mainWindow.loadURL(`file://${__dirname}/../template/index.html`);
 
   // ウィンドウが閉じられたらアプリも終了
