@@ -4,13 +4,17 @@ const inputnita = document.getElementById('inputnita');
 const canvasxy = acgraph.create('canvasxy');
 
 
-inputnxi.addEventListener('change', updatenxiita);
-inputnita.addEventListener('change', updatenxiita);
+inputnxi.addEventListener('change', updatecanvasxiita);
+inputnita.addEventListener('change', updatecanvasxiita);
 window.addEventListener('resize', resizewindow, false);
-canvasxy.addEventListener('click', drawxy);
+
+canvasxy.rect(10, 10, 100, 100);
+canvasxy.listen('click', function(e){
+    console.log("!");
+});
 
 
-function updatenxiita(){
+function updatecanvasxiita(){
     //----------Initialize canvas----------
     if(Number(inputnxi.value) == 0){
         inputnxi.value = 1;
@@ -47,10 +51,9 @@ function updatenxiita(){
         .moveTo(10, canvasxiita.height() - 15)
         .lineTo(10, canvasxiita.height() - 55)
         .stroke('yellow');
-    cordinatexitextstyle = {fontFamily: 'Times New Roman', fontSize: '15px', color: 'white'};
-    canvasxiita.text(55, canvasxiita.height() - 25, "ξ", cordinatexitextstyle);
-    cordinateitatextstyle = {fontFamily: 'Times New Roman', fontSize: '15px', color: 'white'};
-    canvasxiita.text(5, canvasxiita.height() - 75, "η", cordinateitatextstyle);
+    cordinatexiitatextstyle = {fontFamily: 'Times New Roman', fontStyle: 'italic', fontSize: '15px', color: 'white'};
+    canvasxiita.text(55, canvasxiita.height() - 25, "ξ", cordinatexiitatextstyle);
+    canvasxiita.text(5, canvasxiita.height() - 75, "η", cordinatexiitatextstyle);
 
     //----------Draw point marker----------
     pointmarkertextstyle = {fontFamily: 'Times New Roman', fontSize: '15px', color: 'lightsalmon'};
@@ -61,16 +64,30 @@ function updatenxiita(){
 }
 
 
-function resizewindow(){
-    canvasxiita.resize(document.getElementById('canvasxiita').parentNode.clientWidth, document.getElementById('canvasxiita').parentNode.clientHeight);
-    updatenxiita();
+function updatecanvasxy(){
+    //----------Initialize canvasxy----------
+    canvasxy.removeChildren();
+
+    //----------Draw coordinate----------
+    canvasxy.path()
+        .moveTo(10, canvasxy.height() - 15)
+        .lineTo(50, canvasxy.height() - 15)
+        .stroke('red');
+    canvasxy.path()
+        .moveTo(10, canvasxy.height() - 15)
+        .lineTo(10, canvasxy.height() - 55)
+        .stroke('yellow');
+    cordinatexytextstyle = {fontFamily: 'Times New Roman', fontStyle: 'italic', fontSize: '15px', color: 'white'};
+    canvasxy.text(55, canvasxy.height() - 25, "x", cordinatexytextstyle);
+    canvasxy.text(5, canvasxy.height() - 75, "y", cordinatexytextstyle);
 }
 
 
-function drawxy(e){
-    var rect = e.target.getBoundingClientRect();
-    var x = e.clientX - Math.floor(rect.left);
-    var y = e.clientY - Math.floor(rect.top);
+function resizewindow(){
+    canvasxiita.resize(document.getElementById('canvasxiita').parentNode.clientWidth, document.getElementById('canvasxiita').parentNode.clientHeight);
+    updatecanvasxiita();
+    canvasxy.resize(document.getElementById('canvasxy').parentNode.clientWidth, document.getElementById('canvasxy').parentNode.clientHeight);
+    updatecanvasxy();
 }
 
 
