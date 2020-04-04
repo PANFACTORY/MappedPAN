@@ -163,15 +163,16 @@ stagexy.addEventListener('stagemousedown', xymousedown);
 
 
 function resizewindow(){
-    stagexiita.canvas.width = document.getElementById('canvasxiita').parentNode.clientWidth;
-    stagexiita.canvas.height = document.getElementById('canvasxiita').parentNode.clientHeight;
+    //Need to modify
+    stagexiita.canvas.width = document.getElementById('canvasxiita').parentNode.parentNode.clientWidth;
+    stagexiita.canvas.height = document.getElementById('canvasxiita').parentNode.parentNode.clientHeight - document.getElementById('headerxiita').clientHeight - document.getElementById('footerxiita').clientHeight*1.2;
     stagexiita.update();
     
     drawxiitacoordinate();
     drawxiitamesh();
     
     stagexy.canvas.width = document.getElementById('canvasxy').parentNode.clientWidth;
-    stagexy.canvas.height = document.getElementById('canvasxy').parentNode.clientHeight;
+    stagexy.canvas.height = document.getElementById('canvasxy').parentNode.parentNode.clientHeight - document.getElementById('headerxy').clientHeight - document.getElementById('footerxiita').clientHeight*1.2;
     stagexy.update();
     
     drawxycoordinate();
