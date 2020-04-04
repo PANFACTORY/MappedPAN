@@ -1,25 +1,71 @@
-const canvasxiita = acgraph.create('canvasxiita');          
 const inputnxi = document.getElementById('inputnxi');
 const inputnita = document.getElementById('inputnita');
-const canvasxy = acgraph.create('canvasxy');
-const layerxycordinate = canvasxy.layer();                  //  canvasxyの座標軸描画用レイヤー
-const layerxymesh = canvasxy.layer();                       //  canvasxyのメッシュ描画用レイヤー
+
+
+const stagexiita = new createjs.Stage('canvasxiita');       //  ξη座標系ステージ
+const xiitacoordinate = new createjs.Container();           //  ξη座標系座標軸コンテナ
+stagexiita.addChild(xiitacoordinate);
+const xiitamesh = new createjs.Container();                 //  ξη座標系メッシュコンテナ
+stagexiita.addChild(xiitamesh);
+
+
+function drawxiitacoordinate(){
+    //----------Initialize container----------
+    xiitacoordinate.removeAllChildren();
+
+    //----------Draw coordinate----------
+    var line = new createjs.Graphics();
+    line.s('red').mt(10, stagexiita.canvas.height - 15).lt(50, stagexiita.canvas.height - 15).es();
+    line.s('yellow').mt(10, stagexiita.canvas.height - 15).lt(10, stagexiita.canvas.height - 55).es();
+    var shape = new createjs.Shape(line);
+    xiitacoordinate.addChild(shape);
+
+    var textxi = new createjs.Text("ξ", "italic 15px Times New Roman", "white");
+    textxi.x = 55;
+    textxi.y = stagexiita.canvas.height - 25;
+    xiitacoordinate.addChild(textxi);
+
+    var textita = new createjs.Text("η", "italic 15px Times New Roman", "white");
+    textita.x = 5;
+    textita.y = stagexiita.canvas.height - 75;
+    xiitacoordinate.addChild(textita);   
+    
+    stagexiita.update();
+}
+
+
+function drawxiitamesh(){
+    //----------Initialize container----------
+    xiitamesh.removeAllChildren();
+
+    //----------Draw mesh----------
+}
+
+
+
+
+
+
+
+//const canvasxy = acgraph.create('canvasxy');
+//const layerxycordinate = canvasxy.layer();                  //  canvasxyの座標軸描画用レイヤー
+//const layerxymesh = canvasxy.layer();                       //  canvasxyのメッシュ描画用レイヤー
 const buttonline = document.getElementById('buttonline');
 
 
 inputnxi.addEventListener('change', updatecanvasxiita);
 inputnita.addEventListener('change', updatecanvasxiita);
 window.addEventListener('resize', resizewindow, false);
-layerxymesh.listen('click', function(){
+/*layerxymesh.listen('click', function(){
     console.log(canvasxy.data());
-});
+});*/
 
 
-layerxymesh.rect(10, 10, 100, 100);
+//layerxymesh.rect(10, 10, 100, 100);
 
 
 function updatecanvasxiita(){
-    //----------Initialize canvas----------
+/*    //----------Initialize canvas----------
     if(Number(inputnxi.value) == 0){
         inputnxi.value = 1;
     }
@@ -65,10 +111,11 @@ function updatecanvasxiita(){
     canvasxiita.text(Number(inputnxi.value)*delta + offsetxi + 5, Number(inputnita.value)*delta + offsetita, '1', pointmarkertextstyle);
     canvasxiita.text(Number(inputnxi.value)*delta + offsetxi + 5, offsetita - 10, '2', pointmarkertextstyle);
     canvasxiita.text(offsetxi - 10, offsetita - 10, '3', pointmarkertextstyle);
+*/
 }
 
 
-function updatecanvasxy(){
+/*function updatecanvasxy(){
     //----------Initialize canvasxy----------
     layerxycordinate.removeChildren();
 
@@ -84,14 +131,21 @@ function updatecanvasxy(){
     cordinatexytextstyle = {fontFamily: 'Times New Roman', fontStyle: 'italic', fontSize: '15px', color: 'white'};
     layerxycordinate.text(55, canvasxy.height() - 25, "x", cordinatexytextstyle);
     layerxycordinate.text(5, canvasxy.height() - 75, "y", cordinatexytextstyle);
-}
+}*/
 
 
 function resizewindow(){
-    canvasxiita.resize(document.getElementById('canvasxiita').parentNode.clientWidth, document.getElementById('canvasxiita').parentNode.clientHeight);
-    updatecanvasxiita();
-    canvasxy.resize(document.getElementById('canvasxy').parentNode.clientWidth, document.getElementById('canvasxy').parentNode.clientHeight);
-    updatecanvasxy();
+    stagexiita.canvas.width = document.getElementById('canvasxiita').parentNode.clientWidth;
+    stagexiita.canvas.height = document.getElementById('canvasxiita').parentNode.clientHeight;
+    stagexiita.update();
+    
+    drawxiitacoordinate();
+    drawxiitamesh();
+    
+    
+   
+    //canvasxy.resize(document.getElementById('canvasxy').parentNode.clientWidth, document.getElementById('canvasxy').parentNode.clientHeight);
+    //updatecanvasxy();
 }
 
 
