@@ -1,17 +1,21 @@
-const canvasxiita = acgraph.create('canvasxiita');
+const canvasxiita = acgraph.create('canvasxiita');          
 const inputnxi = document.getElementById('inputnxi');
 const inputnita = document.getElementById('inputnita');
 const canvasxy = acgraph.create('canvasxy');
+const layerxycordinate = canvasxy.layer();                  //  canvasxyの座標軸描画用レイヤー
+const layerxymesh = canvasxy.layer();                       //  canvasxyのメッシュ描画用レイヤー
+const buttonline = document.getElementById('buttonline');
 
 
 inputnxi.addEventListener('change', updatecanvasxiita);
 inputnita.addEventListener('change', updatecanvasxiita);
 window.addEventListener('resize', resizewindow, false);
-
-canvasxy.rect(10, 10, 100, 100);
-canvasxy.listen('click', function(e){
-    console.log("!");
+layerxymesh.listen('click', function(){
+    console.log(canvasxy.data());
 });
+
+
+layerxymesh.rect(10, 10, 100, 100);
 
 
 function updatecanvasxiita(){
@@ -66,20 +70,20 @@ function updatecanvasxiita(){
 
 function updatecanvasxy(){
     //----------Initialize canvasxy----------
-    canvasxy.removeChildren();
+    layerxycordinate.removeChildren();
 
     //----------Draw coordinate----------
-    canvasxy.path()
+    layerxycordinate.path()
         .moveTo(10, canvasxy.height() - 15)
         .lineTo(50, canvasxy.height() - 15)
         .stroke('red');
-    canvasxy.path()
+    layerxycordinate.path()
         .moveTo(10, canvasxy.height() - 15)
         .lineTo(10, canvasxy.height() - 55)
         .stroke('yellow');
     cordinatexytextstyle = {fontFamily: 'Times New Roman', fontStyle: 'italic', fontSize: '15px', color: 'white'};
-    canvasxy.text(55, canvasxy.height() - 25, "x", cordinatexytextstyle);
-    canvasxy.text(5, canvasxy.height() - 75, "y", cordinatexytextstyle);
+    layerxycordinate.text(55, canvasxy.height() - 25, "x", cordinatexytextstyle);
+    layerxycordinate.text(5, canvasxy.height() - 75, "y", cordinatexytextstyle);
 }
 
 
