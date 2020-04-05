@@ -133,6 +133,14 @@ class Line {
         _ctx.moveTo(this.p0.x, this.p0.y);
         _ctx.lineTo(this.p1.x, this.p1.y);
         _ctx.stroke();
+        _ctx.strokeStyle = "white";
+        _ctx.beginPath();
+        _ctx.arc(this.p0.x, this.p0.y, 5, 0, 2.0*Math.PI, 0);
+        _ctx.stroke();
+        _ctx.strokeStyle = "white";
+        _ctx.beginPath();
+        _ctx.arc(this.p1.x, this.p1.y, 5, 0, 2.0*Math.PI, 0);
+        _ctx.stroke();
     }
 
     isHit(_p) {
@@ -171,6 +179,10 @@ class Circle {
         _ctx.lineWidth = this.width;
         _ctx.beginPath();
         _ctx.arc(this.p0.x, this.p0.y, this.r, 0, 2.0*Math.PI, 0);
+        _ctx.stroke();
+        _ctx.strokeStyle = "white";
+        _ctx.beginPath();
+        _ctx.arc(this.p0.x, this.p0.y, 5, 0, 2.0*Math.PI, 0);
         _ctx.stroke();
     }
 
@@ -248,7 +260,7 @@ function drawline(_edown){
 
     for(var point of points){
         if(startpoint.Distance(point) < 5){
-            startpoint = point;
+            startpoint = point;                 //  delete必要？
             isstartpointnew = false;
             break;
         }
@@ -319,7 +331,7 @@ function drawcircle(_edown){
 
     for(var point of points){
         if(centerpoint.Distance(point) < 5){
-            centerpoint = point;
+            centerpoint = point;                        //  delete必要？
             iscenterpointnew = false;
             break;
         }
