@@ -161,50 +161,6 @@ resizewindow();
 
 
 
-//********************ボタンイベント********************
-document.getElementById("button_line").onclick = function() {
-    document.getElementById("icon_line").style.color = "lime";
-    document.getElementById("icon_circle").style.color = "white";
-    document.getElementById("icon_delete").style.color = "white";
-    document.getElementById("icon_mesh").style.color = "white";
-    document.getElementById("icon_export").style.color = "white";
-};
-
-
-document.getElementById("button_circle").onclick = function() {
-    document.getElementById("icon_line").style.color = "white";
-    document.getElementById("icon_circle").style.color = "lime";
-    document.getElementById("icon_delete").style.color = "white";
-    document.getElementById("icon_mesh").style.color = "white";
-    document.getElementById("icon_export").style.color = "white";
-};
-
-
-document.getElementById("button_delete").onclick = function() {
-    document.getElementById("icon_line").style.color = "white";
-    document.getElementById("icon_circle").style.color = "white";
-    document.getElementById("icon_delete").style.color = "orangered";
-    document.getElementById("icon_mesh").style.color = "white";
-    document.getElementById("icon_export").style.color = "white";
-};
-
-
-document.getElementById("button_mesh").onclick = function() {
-    document.getElementById("icon_line").style.color = "white";
-    document.getElementById("icon_circle").style.color = "white";
-    document.getElementById("icon_delete").style.color = "white";
-    document.getElementById("icon_mesh").style.color = "lime";
-    document.getElementById("icon_export").style.color = "white";
-};
-
-
-document.getElementById("button_export").onclick = function() {
-    document.getElementById("icon_line").style.color = "white";
-    document.getElementById("icon_circle").style.color = "white";
-    document.getElementById("icon_delete").style.color = "white";
-    document.getElementById("icon_mesh").style.color = "white";
-    document.getElementById("icon_export").style.color = "lime";
-};
 
 
 
@@ -237,13 +193,40 @@ class Line {
         this.p1.shared++;
     }
 
-    draw(_ctx) {
+    Draw(_ctx) {
         _ctx.strokeStyle = this.color;
         _ctx.lineWidth = this.width;
         _ctx.beginPath();
         _ctx.moveTo(this.p0.x, this.p0.y);
         _ctx.lineTo(this.p1.x, this.p1.y);
         _ctx.stroke();
+    }
+
+    isHit(_p) {
+        return false;
+    }
+}
+
+
+class Circle {
+    constructor(_p0, _r, _color = "black", _width = 1) {
+        this.p0 = _p0;
+        this.r = _r
+        this.color = _color;
+        this.width = _width;
+        this.p0.shared++;
+    }
+
+    Draw(_ctx) {
+        _ctx.strokeStyle = this.color;
+        _ctx.lineWidth = this.width;
+        _ctx.beginPath();
+        _ctx.arc(this.p0.x, this.p0.y, this.r, 0, 2.0*Math.PI, 0);
+        _ctx.stroke();
+    }
+
+    isHit(_p) {
+        return false;
     }
 }
 
@@ -271,7 +254,7 @@ var elements = new Array();                                         //  xy座標
 var points = new Array();                                           //  xy座標系に作図された点の配列
 
 
-canvas_xy_tmp.addEventListener('mousedown', function(_edown){
+function drawline(_edown){
     var rect = _edown.target.getBoundingClientRect();
     var startpoint = new Point(_edown.clientX - rect.left, _edown.clientY - rect.top);
     var isstartpointnew = true;
@@ -288,10 +271,10 @@ canvas_xy_tmp.addEventListener('mousedown', function(_edown){
         points.push(startpoint);
     }   
 
-    canvas_xy_tmp.addEventListener('mousemove', drawlinetmp);
-    canvas_xy_tmp.addEventListener('mouseup', drawline);
+    canvas_xy_tmp.addEventListener('mousemove', guid);
+    canvas_xy_tmp.addEventListener('mouseup', draw);
 
-    function drawlinetmp(_etmp){
+    function guid(_etmp){
         ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
 
         var rect = _etmp.target.getBoundingClientRect();
@@ -305,10 +288,10 @@ canvas_xy_tmp.addEventListener('mousedown', function(_edown){
         }
         
         var line = new Line(startpoint, endpoint, "gold");
-        line.draw(ctx_xy_tmp);
+        line.Draw(ctx_xy_tmp);
     }    
 
-    function drawline(_eup){
+    function draw(_eup){
         ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
 
         var rect = _eup.target.getBoundingClientRect();
@@ -328,13 +311,73 @@ canvas_xy_tmp.addEventListener('mousedown', function(_edown){
         }
         
         var line = new Line(startpoint, endpoint, "aqua");
-        line.draw(ctx_xy);
+        line.Draw(ctx_xy);
         elements.push(line);
 
-        canvas_xy_tmp.removeEventListener('mousemove', drawlinetmp);
-        canvas_xy_tmp.removeEventListener('mouseup', drawline);
+        canvas_xy_tmp.removeEventListener('mousemove', guid);
+        canvas_xy_tmp.removeEventListener('mouseup', draw);
     }    
-});
+}
+
+
+function drawcircle(_edown){
+    var rect = _edown.target.getBoundingClientRect();
+    var centerpoint = new Point(_edown.clientX - rect.left, _edown.clientY - rect.top);
+    var iscenterpointnew = true;
+
+    for(var point of points){
+        if(centerpoint.Distance(point) < 5){
+            centerpoint = point;
+            iscenterpointnew = false;
+            break;
+        }
+    }
+
+    if(iscenterpointnew){
+        points.push(centerpoint);
+    }   
+
+    canvas_xy_tmp.addEventListener('mousemove', guidecircle);
+    canvas_xy_tmp.addEventListener('mouseup', drawfinish);
+
+    function guidecircle(_etmp){
+        ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
+
+        var rect = _etmp.target.getBoundingClientRect();
+        var edgepoint = new Point(_etmp.clientX - rect.left, _etmp.clientY - rect.top);
+       
+        for(var point of points){
+            if(edgepoint.Distance(point) < 5){
+                edgepoint = point;
+                break;
+            }
+        }
+        
+        var circle = new Circle(centerpoint, centerpoint.Distance(edgepoint), "gold");
+        circle.Draw(ctx_xy_tmp);
+    }    
+
+    function drawfinish(_eup){
+        ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
+
+        var rect = _eup.target.getBoundingClientRect();
+        var edgepoint = new Point(_eup.clientX - rect.left, _eup.clientY - rect.top);
+        
+        for(var point of points){
+            if(edgepoint.Distance(point) < 5){
+                edgepoint = point;
+                break;
+            }
+        }
+        
+        var circle = new Circle(centerpoint, centerpoint.Distance(edgepoint), "aqua");
+        circle.Draw(ctx_xy);
+        elements.push(circle);
+
+        canvas_xy_tmp.removeEventListener('mousemove', guidecircle);
+        canvas_xy_tmp.removeEventListener('mouseup', drawfinish);
+    }    
+}
 
 
 function drawcoordinate(_canvas, _ctx, _axis0, _axis1){
@@ -370,7 +413,7 @@ function drawcoordinate(_canvas, _ctx, _axis0, _axis1){
 
 
 //********************初期化関係********************
-function initialize(){
+function initializeButton(){
     //----------ボタンの色----------
     document.getElementById("icon_line").style.color = "white";
     document.getElementById("icon_circle").style.color = "white";
@@ -378,6 +421,13 @@ function initialize(){
     document.getElementById("icon_mesh").style.color = "white";
     document.getElementById("icon_export").style.color = "white";
 
+    //-----------イベントリスナーの解除----------
+    canvas_xy_tmp.removeEventListener('mousedown', drawline);
+    canvas_xy_tmp.removeEventListener('mousedown', drawcircle);
+}
+
+
+function initializeCanvas(){
     //----------ξη座標系----------
     drawcoordinate(canvas_xiita, ctx_xiita, "ξ", "η");
 
@@ -386,4 +436,51 @@ function initialize(){
 }
 
 
-initialize();
+initializeButton();
+initializeCanvas();
+
+
+
+
+
+
+
+
+
+
+//********************ボタンイベント********************
+document.getElementById("button_line").onclick = function() {
+    initializeButton();
+
+    document.getElementById("icon_line").style.color = "lime";
+    canvas_xy_tmp.addEventListener('mousedown', drawline);
+};
+
+
+document.getElementById("button_circle").onclick = function() {
+    initializeButton();
+
+    document.getElementById("icon_circle").style.color = "lime";
+    canvas_xy_tmp.addEventListener('mousedown', drawcircle);
+};
+
+
+document.getElementById("button_delete").onclick = function() {
+    initializeButton();
+
+    document.getElementById("icon_delete").style.color = "orangered";
+};
+
+
+document.getElementById("button_mesh").onclick = function() {
+    initializeButton();
+    
+    document.getElementById("icon_mesh").style.color = "lime";
+};
+
+
+document.getElementById("button_export").onclick = function() {
+    initializeButton();
+    
+    document.getElementById("icon_export").style.color = "lime";
+};
