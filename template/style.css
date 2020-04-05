@@ -7,3 +7,15 @@ body {
 .height-full {
     height: 100vh;
 }
+
+
+.canvas-wrapper {
+    position: relative;
+}
+
+
+.canvas-wrapper canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+}

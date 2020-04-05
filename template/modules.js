@@ -124,42 +124,13 @@ function drawxycoordinate(){
 }
 
 
-function xymousedown(event){
-    xyx0 = event.stageX;
-    xyy0 = event.stageY;
-    stagexy.addEventListener("stagemousemove", xymousemove);
-    stagexy.addEventListener("stagemouseup", xymouseup);
-}
 
-
-function xymousemove(event){
-    xytmp.removeAllChildren();
-    var line = new createjs.Graphics();
-    line.s('lightsalmon').mt(xyx0, xyy0).lt(event.stageX, event.stageY).es();
-    var shape = new createjs.Shape(line);
-    xytmp.addChild(shape);
-    stagexy.update();
-}
-
-
-function xymouseup(event){
-    xytmp.removeAllChildren();
-    var line = new createjs.Graphics();
-    line.s('aqua').mt(xyx0, xyy0).lt(event.stageX, event.stageY).es();
-    var shape = new createjs.Shape(line);
-    xymesh.addChild(shape);
-    stagexy.update();
-
-    stagexy.removeEventListener("stagemousemove", xymousemove);
-    stagexy.removeEventListener("stagemouseup", xymouseup);
-}
 
 
 //********************イベント********************
 inputnxi.addEventListener('change', drawxiitamesh);
 inputnita.addEventListener('change', drawxiitamesh);
 window.addEventListener('resize', resizewindow, false);
-stagexy.addEventListener('stagemousedown', xymousedown);
 
 
 function resizewindow(){
@@ -183,16 +154,109 @@ resizewindow();
 */
 
 
-const canvas_xiita = document.getElementById('canvas_xiita');
+class Point {
+    constructor(_x, _y) {
+        this.x = _x;
+        this.y = _y;
+        this.shared = 0;    //  この点を含む要素の数
+    }
 
-
-window.addEventListener('resize', resizewindow, false);
-
-
-function resizewindow(){
-    canvas_xiita.width = document.getElementById('canvas_xiita').parentNode.clientWidth;
-    canvas_xiita.height = document.getElementById('canvas_xiita').parentNode.clientHeight - 10;
+    Distance(_p) {
+        return Math.sqrt((this.x - _p.x)**2, (this.y - _p.y)**2);
+    }
 }
 
 
-resizewindow();
+class Line {
+    constructor(_p0, _p1) {
+        this.p0 = _p0;
+        this.p1 = _p1;
+        this.p0.shared++;
+        this.p1.shared++;
+    }
+
+    draw(_ctx, _color) {
+        _ctx.strokeStyle = _color;
+        _ctx.lineWidth = 1;
+        _ctx.beginPath();
+        _ctx.moveTo(this.p0.x, this.p0.y);
+        _ctx.lineTo(this.p1.x, this.p1.y);
+        _ctx.stroke();
+    }
+}
+
+
+const canvas_xy = document.getElementById('canvas_xy');             //  xy座標系の作図用canvas
+const ctx_xy = canvas_xy.getContext('2d');                          //  xy座標系の作図用canvasのcontext
+const canvas_xy_tmp = document.getElementById('canvas_xy_tmp');     //  xy座標系の下書き用canvas
+const ctx_xy_tmp = canvas_xy_tmp.getContext('2d');                  //  xy座標系の下書き用canvasのcontext
+
+
+var elements = new Array();                                         //  xy座標系に作図された要素の配列
+var points = new Array();                                           //  xy座標系に作図された点の配列
+
+
+canvas_xy.addEventListener('mousedown', function(_edown){
+    var rect = _edown.target.getBoundingClientRect();
+    var startpoint = new Point(_edown.clientX - rect.left, _edown.clientY - rect.top);
+    var isstartpointnew = true;
+
+    for(var point of points){
+        if(startpoint.Distance(point) < 5){
+            startpoint = point;
+            isstartpointnew = false;
+            break;
+        }
+    }
+
+    if(isstartpointnew){
+        points.push(startpoint);
+    }   
+
+    canvas_xy.addEventListener('mousemove', drawlinetmp);
+    canvas_xy.addEventListener('mouseup', drawline);
+
+    function drawlinetmp(_etmp){
+        ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
+
+        var rect = _etmp.target.getBoundingClientRect();
+        var endpoint = new Point(_etmp.clientX - rect.left, _etmp.clientY - rect.top);
+       
+        for(var point of points){
+            if(endpoint.Distance(point) < 5){
+                endpoint = point;
+                break;
+            }
+        }
+        
+        var line = new Line(startpoint, endpoint);
+        line.draw(ctx_xy_tmp, "gold");
+    }    
+
+    function drawline(_eup){
+        ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
+
+        var rect = _eup.target.getBoundingClientRect();
+        var endpoint = new Point(_eup.clientX - rect.left, _eup.clientY - rect.top);
+        var isendpointnew = true;
+
+        for(var point of points){
+            if(endpoint.Distance(point) < 5){
+                endpoint = point;
+                isendpointnew = false;
+                break;
+            }
+        }
+
+        if(isendpointnew){
+            points.push(endpoint);
+        }
+        
+        var line = new Line(startpoint, endpoint);
+        line.draw(ctx_xy, "aqua");
+        elements.push(line);
+
+        canvas_xy.removeEventListener('mousemove', drawlinetmp);
+        canvas_xy.removeEventListener('mouseup', drawline);
+    }    
+});
