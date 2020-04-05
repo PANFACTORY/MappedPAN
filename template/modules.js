@@ -122,6 +122,10 @@ class Line {
         this.p1.shared++;
     }
 
+    get Length() {
+        return this.p0.Distance(this.p1);
+    }
+
     Draw(_ctx) {
         _ctx.strokeStyle = this.color;
         _ctx.lineWidth = this.width;
@@ -132,6 +136,16 @@ class Line {
     }
 
     isHit(_p) {
+        var a = this.p1.y - this.p0.y;
+        var b = this.p0.x - this.p1.x;
+        var c = this.p1.x*this.p0.y - this.p0.x*this.p1.y;
+        var d0 = Math.abs(a*_p.x + b*_p.y + c)/Math.sqrt(a**2 + b**2);
+        var d1 = this.p0.Distance(_p);
+        var d2 = this.p1.Distance(_p);
+        var d3 = this.Length;
+        if(d0 < 5 && d1 < d3 + 5 && d2 < d3 + 5){
+            return true;
+        }
         return false;
     }
 }
