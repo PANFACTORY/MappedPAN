@@ -1,6 +1,5 @@
 /*const inputnxi = document.getElementById('inputnxi');
 const inputnita = document.getElementById('inputnita');
-const buttonline = document.getElementById('buttonline');
 
 
 //********************ξη座標系ステージ********************
@@ -154,6 +153,67 @@ resizewindow();
 */
 
 
+
+
+
+
+
+
+
+
+//********************ボタンイベント********************
+document.getElementById("button_line").onclick = function() {
+    document.getElementById("icon_line").style.color = "lime";
+    document.getElementById("icon_circle").style.color = "white";
+    document.getElementById("icon_delete").style.color = "white";
+    document.getElementById("icon_mesh").style.color = "white";
+    document.getElementById("icon_export").style.color = "white";
+};
+
+
+document.getElementById("button_circle").onclick = function() {
+    document.getElementById("icon_line").style.color = "white";
+    document.getElementById("icon_circle").style.color = "lime";
+    document.getElementById("icon_delete").style.color = "white";
+    document.getElementById("icon_mesh").style.color = "white";
+    document.getElementById("icon_export").style.color = "white";
+};
+
+
+document.getElementById("button_delete").onclick = function() {
+    document.getElementById("icon_line").style.color = "white";
+    document.getElementById("icon_circle").style.color = "white";
+    document.getElementById("icon_delete").style.color = "orangered";
+    document.getElementById("icon_mesh").style.color = "white";
+    document.getElementById("icon_export").style.color = "white";
+};
+
+
+document.getElementById("button_mesh").onclick = function() {
+    document.getElementById("icon_line").style.color = "white";
+    document.getElementById("icon_circle").style.color = "white";
+    document.getElementById("icon_delete").style.color = "white";
+    document.getElementById("icon_mesh").style.color = "lime";
+    document.getElementById("icon_export").style.color = "white";
+};
+
+
+document.getElementById("button_export").onclick = function() {
+    document.getElementById("icon_line").style.color = "white";
+    document.getElementById("icon_circle").style.color = "white";
+    document.getElementById("icon_delete").style.color = "white";
+    document.getElementById("icon_mesh").style.color = "white";
+    document.getElementById("icon_export").style.color = "lime";
+};
+
+
+
+
+
+
+
+
+
 class Point {
     constructor(_x, _y) {
         this.x = _x;
@@ -168,16 +228,18 @@ class Point {
 
 
 class Line {
-    constructor(_p0, _p1) {
+    constructor(_p0, _p1, _color = "black", _width = 1) {
         this.p0 = _p0;
         this.p1 = _p1;
+        this.color = _color;
+        this.width = _width;
         this.p0.shared++;
         this.p1.shared++;
     }
 
-    draw(_ctx, _color) {
-        _ctx.strokeStyle = _color;
-        _ctx.lineWidth = 1;
+    draw(_ctx) {
+        _ctx.strokeStyle = this.color;
+        _ctx.lineWidth = this.width;
         _ctx.beginPath();
         _ctx.moveTo(this.p0.x, this.p0.y);
         _ctx.lineTo(this.p1.x, this.p1.y);
@@ -186,6 +248,19 @@ class Line {
 }
 
 
+
+
+
+//********************ξη座標系********************
+const canvas_xiita = document.getElementById('canvas_xiita');       //  ξη座標系の作図用canvas
+const ctx_xiita = canvas_xiita.getContext('2d');                    //  ξη座標系の作図用canvasのcontext
+
+
+
+
+
+
+//********************xy座標系********************
 const canvas_xy = document.getElementById('canvas_xy');             //  xy座標系の作図用canvas
 const ctx_xy = canvas_xy.getContext('2d');                          //  xy座標系の作図用canvasのcontext
 const canvas_xy_tmp = document.getElementById('canvas_xy_tmp');     //  xy座標系の下書き用canvas
@@ -196,7 +271,7 @@ var elements = new Array();                                         //  xy座標
 var points = new Array();                                           //  xy座標系に作図された点の配列
 
 
-canvas_xy.addEventListener('mousedown', function(_edown){
+canvas_xy_tmp.addEventListener('mousedown', function(_edown){
     var rect = _edown.target.getBoundingClientRect();
     var startpoint = new Point(_edown.clientX - rect.left, _edown.clientY - rect.top);
     var isstartpointnew = true;
@@ -213,8 +288,8 @@ canvas_xy.addEventListener('mousedown', function(_edown){
         points.push(startpoint);
     }   
 
-    canvas_xy.addEventListener('mousemove', drawlinetmp);
-    canvas_xy.addEventListener('mouseup', drawline);
+    canvas_xy_tmp.addEventListener('mousemove', drawlinetmp);
+    canvas_xy_tmp.addEventListener('mouseup', drawline);
 
     function drawlinetmp(_etmp){
         ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
@@ -229,8 +304,8 @@ canvas_xy.addEventListener('mousedown', function(_edown){
             }
         }
         
-        var line = new Line(startpoint, endpoint);
-        line.draw(ctx_xy_tmp, "gold");
+        var line = new Line(startpoint, endpoint, "gold");
+        line.draw(ctx_xy_tmp);
     }    
 
     function drawline(_eup){
@@ -252,11 +327,63 @@ canvas_xy.addEventListener('mousedown', function(_edown){
             points.push(endpoint);
         }
         
-        var line = new Line(startpoint, endpoint);
-        line.draw(ctx_xy, "aqua");
+        var line = new Line(startpoint, endpoint, "aqua");
+        line.draw(ctx_xy);
         elements.push(line);
 
-        canvas_xy.removeEventListener('mousemove', drawlinetmp);
-        canvas_xy.removeEventListener('mouseup', drawline);
+        canvas_xy_tmp.removeEventListener('mousemove', drawlinetmp);
+        canvas_xy_tmp.removeEventListener('mouseup', drawline);
     }    
 });
+
+
+function drawcoordinate(_canvas, _ctx, _axis0, _axis1){
+    //----------Initialize context----------
+    _ctx.clearRect(0, 0, _canvas.width, _canvas.height);
+
+    //----------Draw coordinate----------
+    _ctx.strokeStyle = "red";
+    _ctx.lineWidth = 1;
+    _ctx.beginPath();
+    _ctx.moveTo(10, _canvas.height - 15);
+    _ctx.lineTo(50, _canvas.height - 15);
+    _ctx.stroke();
+
+    _ctx.strokeStyle = "yellow";
+    _ctx.lineWidth = 1;
+    _ctx.beginPath();
+    _ctx.moveTo(10, _canvas.height - 15);
+    _ctx.lineTo(10, _canvas.height - 55);
+    _ctx.stroke();
+
+    _ctx.fillStyle = "white";
+    _ctx.font = "italic 15px 'Times New Roman'";
+    _ctx.textAlign = "left";
+    _ctx.textBaseline = "top";
+    _ctx.fillText(_axis0, 55, _canvas.height - 25);
+    _ctx.fillText(_axis1, 5, _canvas.height - 75);
+}
+
+
+
+
+
+
+//********************初期化関係********************
+function initialize(){
+    //----------ボタンの色----------
+    document.getElementById("icon_line").style.color = "white";
+    document.getElementById("icon_circle").style.color = "white";
+    document.getElementById("icon_delete").style.color = "white";
+    document.getElementById("icon_mesh").style.color = "white";
+    document.getElementById("icon_export").style.color = "white";
+
+    //----------ξη座標系----------
+    drawcoordinate(canvas_xiita, ctx_xiita, "ξ", "η");
+
+    //----------xy座標系----------
+    drawcoordinate(canvas_xy, ctx_xy, "x", "y");
+}
+
+
+initialize();
