@@ -148,6 +148,11 @@ class Line {
         }
         return false;
     }
+
+    releasePoint() {
+        this.p0.shared--;
+        this.p1.shared--;
+    }
 }
 
 
@@ -174,6 +179,10 @@ class Circle {
             return true;
         }
         return false;
+    }
+
+    releasePoint() {
+        this.p0.shared--;
     }
 }
 
@@ -265,8 +274,12 @@ function drawline(_edown){
             }
         }
         
-        var line = new Line(startpoint, endpoint, "gold");
-        line.Draw(ctx_xy_tmp);
+        ctx_xy_tmp.strokeStyle = "gold";
+        ctx_xy_tmp.lineWidth = 2;
+        ctx_xy_tmp.beginPath();
+        ctx_xy_tmp.moveTo(startpoint.x, startpoint.y);
+        ctx_xy_tmp.lineTo(endpoint.x, endpoint.y);
+        ctx_xy_tmp.stroke();
     }    
 
     function draw(_eup){
@@ -332,8 +345,11 @@ function drawcircle(_edown){
             }
         }
         
-        var circle = new Circle(centerpoint, centerpoint.Distance(edgepoint), "gold");
-        circle.Draw(ctx_xy_tmp);
+        ctx_xy_tmp.strokeStyle = "gold";
+        ctx_xy_tmp.lineWidth = 2;
+        ctx_xy_tmp.beginPath();
+        ctx_xy_tmp.arc(centerpoint.x, centerpoint.y, centerpoint.Distance(edgepoint), 0, 2.0*Math.PI, 0);
+        ctx_xy_tmp.stroke();
     }    
 
     function draw(_eup){
@@ -368,14 +384,24 @@ function deleteelement(_edown){
 
     for(var i = 0; i < elements.length; i++){
         if(elements[i].isHit(clickpoint)) {
+            elements[i].releasePoint();
+            delete elements[i];
             elements.splice(i, 1);
             isneedredraw = true;
             break;
         }
     }
 
-    //----------再描画----------
     if(isneedredraw){
+        //----------不要な点の削除----------
+        for(var i = points.length - 1; i >= 0; i--){
+            if(points[i].shared <= 0) {
+                delete points[i];
+                points.splice(i, 1);
+            }
+        }
+
+        //----------再描画----------
         ctx_xy.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
         for(var element of elements){
             element.Draw(ctx_xy);
