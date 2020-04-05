@@ -1,4 +1,4 @@
-const inputnxi = document.getElementById('inputnxi');
+/*const inputnxi = document.getElementById('inputnxi');
 const inputnita = document.getElementById('inputnita');
 const buttonline = document.getElementById('buttonline');
 
@@ -176,6 +176,22 @@ function resizewindow(){
     stagexy.update();
     
     drawxycoordinate();
+}
+
+
+resizewindow();
+*/
+
+
+const canvas_xiita = document.getElementById('canvas_xiita');
+
+
+window.addEventListener('resize', resizewindow, false);
+
+
+function resizewindow(){
+    canvas_xiita.width = document.getElementById('canvas_xiita').parentNode.clientWidth;
+    canvas_xiita.height = document.getElementById('canvas_xiita').parentNode.clientHeight - 10;
 }
 
 

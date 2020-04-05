@@ -6,7 +6,6 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
   <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
-  <script src="https://code.createjs.com/1.0.0/createjs.min.js"></script>
   <link rel="stylesheet" href="style.css">
   <title>MappedPAN</title>
 </head>
@@ -16,36 +15,34 @@
   <div class="container-fluid">
     <div class="row height-full">
       <!----------ξ-η座標系入力部分---------->
-      <div class="col-sm-6 card bg-dark border-white">
-        <div id="headerxiita" class="card-header border-info text-white"><div class="font-italic">ξ-η Coordinate</div></div>
-        <div class="card-body p-0">
-          <canvas id="canvasxiita"></canvas>
+      <div class="col-sm-6 card bg-dark border-info">
+        <div class="card-header border-info text-white"><div class="font-italic">ξ-η Coordinate</div></div>
+        <div class="card-body p-0 m-0">
+          <canvas id="canvas_xiita"></canvas>
         </div>
-        <div id="footerxiita" class="card-footer border-info">
-          <form>
-            <div class="form-row">
-              <div class="form-group col-sm-6 text-white">
-                <label for="inputnxi" class="font-italic">nξ</label>
-                <input type="number" class="form-control" id="inputnxi" placeholder="1" min="1" required>
-              </div>
-              <div class="form-group col-sm-6 text-white">
-                <label for="inputnita" class="font-italic">nη</label>
-                <input type="number" class="form-control" id="inputnita" placeholder="1" min="1" required>
-              </div>
+        <div class="card-footer border-info">
+          <form class="form-inline">
+            <div class="form-group">
+              <label for="inputnxi" class="font-italic text-white">nξ</label>
+              <input type="number" class="form-control" id="inputnxi" placeholder=1 min=1 required>
+            </div>
+            <div class="form-group">
+              <label for="inputnita" class="font-italic text-white">nη</label>
+              <input type="number" class="form-control" id="inputnita" placeholder=1 min=1 required>
             </div>
           </form>
-        </div>
+        </div>  
       </div>
 
       <!----------x-y座標系入力部分---------->
       <div class="col-sm-6 card bg-dark border-info">
-        <div id="headerxy" class="card-header border-info text-white"><div class="font-italic">x-y Coordinate</div></div>
-        <div class="card-body p-0">
-          <canvas id="canvasxy"></canvas>
+        <div class="card-header border-info text-white"><div class="font-italic">x-y Coordinate</div></div>
+        <div class="card-body p-0 m-0">
+          <canvas id="canvas_xy"></canvas>
         </div>
-        <div id="footerxy" class="card-footer border-info">
-          <button id="buttonline" class="btn-link"><i id="iconline" class="fas fa-slash text-white"></i></button>
-          <button id="buttoncircle" class="btn-link"><i id="iconcircle" class="far fa-circle text-white"></i></button>
+        <div class="card-footer border-info">
+          <button id="buttonline" class="btn btn-link"><i id="iconline" class="fas fa-slash text-white"></i></button>
+          <button id="buttoncircle" class="btn btn-link"><i id="iconcircle" class="far fa-circle text-white"></i></button>
          
           <button id="ConvertMesh" class="btn btn-success">Convert</button>
           <button id="ExportMesh" class="btn btn-white">Export</button>
