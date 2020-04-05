@@ -3,38 +3,6 @@ const inputnita = document.getElementById('inputnita');
 
 
 //********************ξη座標系ステージ********************
-const stagexiita = new createjs.Stage('canvasxiita');       //  ξη座標系ステージ
-const xiitacoordinate = new createjs.Container();           //  ξη座標系座標軸コンテナ
-stagexiita.addChild(xiitacoordinate);
-const xiitamesh = new createjs.Container();                 //  ξη座標系メッシュコンテナ
-stagexiita.addChild(xiitamesh);
-
-
-function drawxiitacoordinate(){
-    //----------Initialize container----------
-    xiitacoordinate.removeAllChildren();
-
-    //----------Draw coordinate----------
-    var line = new createjs.Graphics();
-    line.s('red').mt(10, stagexiita.canvas.height - 15).lt(50, stagexiita.canvas.height - 15).es();
-    line.s('yellow').mt(10, stagexiita.canvas.height - 15).lt(10, stagexiita.canvas.height - 55).es();
-    var shape = new createjs.Shape(line);
-    xiitacoordinate.addChild(shape);
-
-    var textxi = new createjs.Text("ξ", "italic 15px Times New Roman", "white");
-    textxi.x = 55;
-    textxi.y = stagexiita.canvas.height - 25;
-    xiitacoordinate.addChild(textxi);
-
-    var textita = new createjs.Text("η", "italic 15px Times New Roman", "white");
-    textita.x = 5;
-    textita.y = stagexiita.canvas.height - 75;
-    xiitacoordinate.addChild(textita);
-    
-    stagexiita.update();
-}
-
-
 function drawxiitamesh(){
     //----------Initialize container----------
     if(Number(inputnxi.value) == 0){
@@ -85,47 +53,6 @@ function drawxiitamesh(){
 }
 
 
-//********************xy座標系ステージ********************
-const stagexy = new createjs.Stage('canvasxy');             //  xy座標系ステージ
-const xycoordinate = new createjs.Container();              //  xy座標系座標軸コンテナ
-stagexy.addChild(xycoordinate);
-const xymesh = new createjs.Container();                    //  xy座標系メッシュコンテナ
-stagexy.addChild(xymesh);
-const xytmp = new createjs.Container();                     //  xy座標系下書きコンテナ
-stagexy.addChild(xytmp);
-var xyx0 = 0;
-var xyy0 = 0;
-
-
-
-function drawxycoordinate(){
-    //----------Initialize container----------
-    xycoordinate.removeAllChildren();
-
-    //----------Draw coordinate----------
-    var line = new createjs.Graphics();
-    line.s('red').mt(10, stagexy.canvas.height - 15).lt(50, stagexy.canvas.height - 15).es();
-    line.s('yellow').mt(10, stagexy.canvas.height - 15).lt(10, stagexy.canvas.height - 55).es();
-    var shape = new createjs.Shape(line);
-    xycoordinate.addChild(shape);
-
-    var textx = new createjs.Text("x", "italic 15px Times New Roman", "white");
-    textx.x = 55;
-    textx.y = stagexy.canvas.height - 25;
-    xycoordinate.addChild(textx);
-
-    var texty = new createjs.Text("y", "italic 15px Times New Roman", "white");
-    texty.x = 5;
-    texty.y = stagexy.canvas.height - 75;
-    xycoordinate.addChild(texty);
-    
-    stagexy.update();
-}
-
-
-
-
-
 //********************イベント********************
 inputnxi.addEventListener('change', drawxiitamesh);
 inputnita.addEventListener('change', drawxiitamesh);
@@ -168,8 +95,9 @@ resizewindow();
 
 
 
+//********************共通********************
 
-
+//----------点要素----------
 class Point {
     constructor(_x, _y) {
         this.x = _x;
@@ -178,11 +106,12 @@ class Point {
     }
 
     Distance(_p) {
-        return Math.sqrt((this.x - _p.x)**2, (this.y - _p.y)**2);
+        return Math.sqrt((this.x - _p.x)**2 + (this.y - _p.y)**2);
     }
 }
 
 
+//----------線要素----------
 class Line {
     constructor(_p0, _p1, _color = "black", _width = 1) {
         this.p0 = _p0;
@@ -208,6 +137,7 @@ class Line {
 }
 
 
+//----------円要素----------
 class Circle {
     constructor(_p0, _r, _color = "black", _width = 1) {
         this.p0 = _p0;
@@ -226,8 +156,40 @@ class Circle {
     }
 
     isHit(_p) {
+        if(Math.abs(this.p0.Distance(_p) - this.r) < 5){
+            return true;
+        }
         return false;
     }
+}
+
+
+//----------座標軸の描画----------
+function drawcoordinate(_canvas, _ctx, _axis0, _axis1){
+    //----------Initialize context----------
+    _ctx.clearRect(0, 0, _canvas.width, _canvas.height);
+
+    //----------Draw coordinate----------
+    _ctx.strokeStyle = "red";
+    _ctx.lineWidth = 1;
+    _ctx.beginPath();
+    _ctx.moveTo(10, _canvas.height - 15);
+    _ctx.lineTo(50, _canvas.height - 15);
+    _ctx.stroke();
+
+    _ctx.strokeStyle = "yellow";
+    _ctx.lineWidth = 1;
+    _ctx.beginPath();
+    _ctx.moveTo(10, _canvas.height - 15);
+    _ctx.lineTo(10, _canvas.height - 55);
+    _ctx.stroke();
+
+    _ctx.fillStyle = "white";
+    _ctx.font = "italic 15px 'Times New Roman'";
+    _ctx.textAlign = "left";
+    _ctx.textBaseline = "top";
+    _ctx.fillText(_axis0, 55, _canvas.height - 25);
+    _ctx.fillText(_axis1, 5, _canvas.height - 75);
 }
 
 
@@ -242,18 +204,20 @@ const ctx_xiita = canvas_xiita.getContext('2d');                    //  ξη座�
 
 
 
-
 //********************xy座標系********************
-const canvas_xy = document.getElementById('canvas_xy');             //  xy座標系の作図用canvas
-const ctx_xy = canvas_xy.getContext('2d');                          //  xy座標系の作図用canvasのcontext
-const canvas_xy_tmp = document.getElementById('canvas_xy_tmp');     //  xy座標系の下書き用canvas
-const ctx_xy_tmp = canvas_xy_tmp.getContext('2d');                  //  xy座標系の下書き用canvasのcontext
+const canvas_xy = document.getElementById('canvas_xy');                             //  xy座標系の作図用canvas
+const ctx_xy = canvas_xy.getContext('2d');                                          //  xy座標系の作図用canvasのcontext
+const canvas_xy_coordinate = document.getElementById('canvas_xy_coordinate');       //  xy座標系の座標軸用canvas
+const ctx_xy_coordinate = canvas_xy_coordinate.getContext('2d');                    //  xy座標系の座標軸用canvasのcontext
+const canvas_xy_tmp = document.getElementById('canvas_xy_tmp');                     //  xy座標系の下書き用canvas
+const ctx_xy_tmp = canvas_xy_tmp.getContext('2d');                                  //  xy座標系の下書き用canvasのcontext
 
 
 var elements = new Array();                                         //  xy座標系に作図された要素の配列
 var points = new Array();                                           //  xy座標系に作図された点の配列
 
 
+//----------線描画のイベント----------
 function drawline(_edown){
     var rect = _edown.target.getBoundingClientRect();
     var startpoint = new Point(_edown.clientX - rect.left, _edown.clientY - rect.top);
@@ -271,10 +235,10 @@ function drawline(_edown){
         points.push(startpoint);
     }   
 
-    canvas_xy_tmp.addEventListener('mousemove', guid);
+    canvas_xy_tmp.addEventListener('mousemove', guide);
     canvas_xy_tmp.addEventListener('mouseup', draw);
 
-    function guid(_etmp){
+    function guide(_etmp){
         ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
 
         var rect = _etmp.target.getBoundingClientRect();
@@ -314,12 +278,13 @@ function drawline(_edown){
         line.Draw(ctx_xy);
         elements.push(line);
 
-        canvas_xy_tmp.removeEventListener('mousemove', guid);
+        canvas_xy_tmp.removeEventListener('mousemove', guide);
         canvas_xy_tmp.removeEventListener('mouseup', draw);
     }    
 }
 
 
+//----------円描画のイベント----------
 function drawcircle(_edown){
     var rect = _edown.target.getBoundingClientRect();
     var centerpoint = new Point(_edown.clientX - rect.left, _edown.clientY - rect.top);
@@ -337,10 +302,10 @@ function drawcircle(_edown){
         points.push(centerpoint);
     }   
 
-    canvas_xy_tmp.addEventListener('mousemove', guidecircle);
-    canvas_xy_tmp.addEventListener('mouseup', drawfinish);
+    canvas_xy_tmp.addEventListener('mousemove', guide);
+    canvas_xy_tmp.addEventListener('mouseup', draw);
 
-    function guidecircle(_etmp){
+    function guide(_etmp){
         ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
 
         var rect = _etmp.target.getBoundingClientRect();
@@ -357,7 +322,7 @@ function drawcircle(_edown){
         circle.Draw(ctx_xy_tmp);
     }    
 
-    function drawfinish(_eup){
+    function draw(_eup){
         ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
 
         var rect = _eup.target.getBoundingClientRect();
@@ -374,39 +339,35 @@ function drawcircle(_edown){
         circle.Draw(ctx_xy);
         elements.push(circle);
 
-        canvas_xy_tmp.removeEventListener('mousemove', guidecircle);
-        canvas_xy_tmp.removeEventListener('mouseup', drawfinish);
+        canvas_xy_tmp.removeEventListener('mousemove', guide);
+        canvas_xy_tmp.removeEventListener('mouseup', draw);
     }    
 }
 
 
-function drawcoordinate(_canvas, _ctx, _axis0, _axis1){
-    //----------Initialize context----------
-    _ctx.clearRect(0, 0, _canvas.width, _canvas.height);
+//----------要素削除のイベント----------
+function deleteelement(_edown){
+    //----------各要素について当たり判定----------
+    var rect = _edown.target.getBoundingClientRect();
+    var clickpoint = new Point(_edown.clientX - rect.left, _edown.clientY - rect.top);
+    var isneedredraw = false;
 
-    //----------Draw coordinate----------
-    _ctx.strokeStyle = "red";
-    _ctx.lineWidth = 1;
-    _ctx.beginPath();
-    _ctx.moveTo(10, _canvas.height - 15);
-    _ctx.lineTo(50, _canvas.height - 15);
-    _ctx.stroke();
+    for(var i = 0; i < elements.length; i++){
+        if(elements[i].isHit(clickpoint)) {
+            elements.splice(i, 1);
+            isneedredraw = true;
+            break;
+        }
+    }
 
-    _ctx.strokeStyle = "yellow";
-    _ctx.lineWidth = 1;
-    _ctx.beginPath();
-    _ctx.moveTo(10, _canvas.height - 15);
-    _ctx.lineTo(10, _canvas.height - 55);
-    _ctx.stroke();
-
-    _ctx.fillStyle = "white";
-    _ctx.font = "italic 15px 'Times New Roman'";
-    _ctx.textAlign = "left";
-    _ctx.textBaseline = "top";
-    _ctx.fillText(_axis0, 55, _canvas.height - 25);
-    _ctx.fillText(_axis1, 5, _canvas.height - 75);
+    //----------再描画----------
+    if(isneedredraw){
+        ctx_xy.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
+        for(var element of elements){
+            element.Draw(ctx_xy);
+        }
+    }
 }
-
 
 
 
@@ -424,6 +385,7 @@ function initializeButton(){
     //-----------イベントリスナーの解除----------
     canvas_xy_tmp.removeEventListener('mousedown', drawline);
     canvas_xy_tmp.removeEventListener('mousedown', drawcircle);
+    canvas_xy_tmp.removeEventListener('mousedown', deleteelement);
 }
 
 
@@ -432,17 +394,12 @@ function initializeCanvas(){
     drawcoordinate(canvas_xiita, ctx_xiita, "ξ", "η");
 
     //----------xy座標系----------
-    drawcoordinate(canvas_xy, ctx_xy, "x", "y");
+    drawcoordinate(canvas_xy_coordinate, ctx_xy_coordinate, "x", "y");
 }
 
 
 initializeButton();
 initializeCanvas();
-
-
-
-
-
 
 
 
@@ -469,6 +426,7 @@ document.getElementById("button_delete").onclick = function() {
     initializeButton();
 
     document.getElementById("icon_delete").style.color = "orangered";
+    canvas_xy_tmp.addEventListener('mousedown', deleteelement);
 };
 
 
