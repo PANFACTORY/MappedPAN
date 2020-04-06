@@ -408,7 +408,6 @@ function meshing(_edown){
     
     for(var element of elements){
         if(element.isHit(clickpoint)) {
-            element.Draw(ctx_xy_tmp, "lime", 3);
             paths.push(element);
             isneedcheck = true;
             break;
@@ -417,7 +416,19 @@ function meshing(_edown){
 
     //----------閉曲線か確認----------
     if(isneedcheck) {
-        
+        for(var i = 0; i < paths.length; i++){
+            if(paths[i].p1 != paths[(i + 1)%paths.length].p0){
+                ctx_xy_tmp.clearRect(0, 0, canvas_xy_tmp.width, canvas_xy_tmp.height);
+                for(var element of paths){
+                    element.Draw(ctx_xy_tmp, "red", 3);
+                }
+            } else {
+                ctx_xy_tmp.clearRect(0, 0, canvas_xy_tmp.width, canvas_xy_tmp.height);
+                for(var element of paths){
+                    element.Draw(ctx_xy_tmp, "lime", 3);
+                }
+            }
+        }
     }
 }
 
