@@ -262,6 +262,8 @@ function drawxiitamesh(){
 //********************xy座標系********************
 const canvas_xy = document.getElementById('canvas_xy');                             //  xy座標系の作図用canvas
 const ctx_xy = canvas_xy.getContext('2d');                                          //  xy座標系の作図用canvasのcontext
+const canvas_xy_mesh = document.getElementById('canvas_xy_mesh');                   //  xy座標系のメッシュ用canvas
+const ctx_xy_mesh = canvas_xy_mesh.getContext('2d');                                //  xy座標系のメッシュ用canvasのcontext
 const canvas_xy_coordinate = document.getElementById('canvas_xy_coordinate');       //  xy座標系の座標軸用canvas
 const ctx_xy_coordinate = canvas_xy_coordinate.getContext('2d');                    //  xy座標系の座標軸用canvasのcontext
 const canvas_xy_tmp = document.getElementById('canvas_xy_tmp');                     //  xy座標系の下書き用canvas
@@ -271,6 +273,7 @@ const ctx_xy_tmp = canvas_xy_tmp.getContext('2d');                              
 var elements = new Array();                                         //  xy座標系に作図された要素の配列
 var points = new Array();                                           //  xy座標系に作図された点の配列
 var paths = new Array();                                            //  xy座標系に作図された要素のうち閉曲線を成す要素の集合
+var meshs = new Array();                                            //  xy座標系に生成されたメッシュ
 
 
 //----------線描画のイベント----------
@@ -479,23 +482,40 @@ function meshing(_edown){
 
         //----------閉曲線ならメッシュを生成----------
         if(isclosedpath) {
-            console.log("meshing!");
             var pbx = new Array();
             var pby = new Array();
             var pbn = [Number(input_nxi.value), Number(input_nita.value), Number(input_nxi.value), Number(input_nita.value)]
             for(var i = 0; i < paths.length; i++) {
                 var points = paths[i].generatePointOnEdge(pbn[i]);
-                console.log(points);
                 for(var point of points){
                     pbx.push(point[0]);
                     pby.push(point[1]);
                 }
             }
-            console.log(pbx, pby);
             var mesh = mappedmeshing(Number(input_nxi.value), Number(input_nita.value), pbx, pby);
-            console.log(mesh);
+            drawmesh(canvas_xy_mesh, ctx_xy_mesh, mesh[0], mesh[1]);
         }
     }
+}
+
+
+function drawmesh(_canvas, _ctx, _xs, _ys) {
+    //----------Initialize context----------
+    _ctx.clearRect(0, 0, _canvas.width, _canvas.height);
+
+    //----------Draw mesh----------
+    _ctx.strokeStyle = "white";
+    _ctx.lineWidth = 1;
+    _ctx.beginPath();
+    for(var i = 0; i < _xs.length - 1; i++) {
+        for(var j = 0; j < _xs[i].length - 1; j++) {
+            _ctx.moveTo(_xs[i][j], _ys[i][j]);
+            _ctx.lineTo(_xs[i + 1][j], _ys[i + 1][j]);
+            _ctx.moveTo(_xs[i][j], _ys[i][j]);
+            _ctx.lineTo(_xs[i][j + 1], _ys[i][j + 1]);
+        }
+    }
+    _ctx.stroke();
 }
 
 
@@ -519,6 +539,7 @@ function initializeButton(){
     //----------その他----------
     paths.splice(0, paths.length);
     ctx_xy_tmp.clearRect(0, 0, canvas_xy_tmp.width, canvas_xy_tmp.height);
+    ctx_xy_mesh.clearRect(0, 0, canvas_xy_mesh.width, canvas_xy_mesh.height);
 }
 
 
@@ -601,6 +622,9 @@ function resizewindow(){
     canvas_xy.width = document.getElementById('canvas_xy').parentNode.parentNode.clientWidth;
     canvas_xy.height = document.getElementById('canvas_xy').parentNode.parentNode.clientHeight;
     
+    canvas_xy_mesh.width = canvas_xy.width;
+    canvas_xy_mesh.height = canvas_xy.height;
+
     canvas_xy_coordinate.width = canvas_xy.width;
     canvas_xy_coordinate.height = canvas_xy.height;
     
@@ -667,7 +691,7 @@ function mappedmeshing(_nxi, _nita, _pbx, _pby) {
     }
 
     //----------Solve Laplace equation----------
-    for(var k = 0; k < 1000; k++) {
+    for(var k = 0; k < 10000; k++) {
         var errormax = 0;
         for(var i = 1; i < _nxi; i++) {
             for(var j = 1; j < _nita; j++) {
@@ -696,8 +720,7 @@ function mappedmeshing(_nxi, _nita, _pbx, _pby) {
         }
 
         //.....Check convergence.....
-        console.log(errormax);
-        if(errormax < 1.0e-2) {
+        if(errormax < 1.0e-5) {
             console.log(k, errormax);
             break;
         }
