@@ -139,6 +139,14 @@ class Line {
         this.p0.shared--;
         this.p1.shared--;
     }
+
+    generatePointOnEdge(_n) {
+        var points = new Array(_n);
+        for(var i = 0; i < _n; i++){
+            points[i] = [(this.p1.x - this.p0.x)*i/_n + this.p0.x, (this.p1.y - this.p0.y)*i/_n + this.p0.y];
+        }
+        return points;
+    }
 }
 
 
@@ -472,6 +480,20 @@ function meshing(_edown){
         //----------閉曲線ならメッシュを生成----------
         if(isclosedpath) {
             console.log("meshing!");
+            var pbx = new Array();
+            var pby = new Array();
+            var pbn = [Number(input_nxi.value), Number(input_nita.value), Number(input_nxi.value), Number(input_nita.value)]
+            for(var i = 0; i < paths.length; i++) {
+                var points = paths[i].generatePointOnEdge(pbn[i]);
+                console.log(points);
+                for(var point of points){
+                    pbx.push(point[0]);
+                    pby.push(point[1]);
+                }
+            }
+            console.log(pbx, pby);
+            var mesh = mappedmeshing(Number(input_nxi.value), Number(input_nita.value), pbx, pby);
+            console.log(mesh);
         }
     }
 }
@@ -609,6 +631,77 @@ input_nita.addEventListener('change', drawxiitamesh);
 
 
 //********************メッシング関数********************
-function mappedmeshing(){
-    
+function mappedmeshing(_nxi, _nita, _pbx, _pby) {
+    //----------Get array of xy----------
+    var pinx = new Array(_nxi + 1);
+    var piny = new Array(_nxi + 1);
+    for(var i = 0; i < _nxi + 1; i++) {
+        pinx[i] = new Array(_nita + 1).fill(0);
+        piny[i] = new Array(_nita + 1).fill(0);
+    }
+
+    //----------Set Dirichlet condition----------
+    var pbi = 0;
+    //.....Bottom edge (η = 0).....
+    for(var i = 0; i < _nxi; i++, pbi++){
+        pinx[i][0] = _pbx[pbi];
+        piny[i][0] = _pby[pbi];
+    }
+
+    //.....Right edge (ξ = ξmax).....
+    for(var j = 0; j < _nita; j++, pbi++){
+        pinx[_nxi][j] = _pbx[pbi];
+        piny[_nxi][j] = _pby[pbi];
+    }
+
+    //.....Top edge (η = ηmax).....
+    for(var i = _nxi; i > 0; i--, pbi++){
+        pinx[i][_nita] = _pbx[pbi];
+        piny[i][_nita] = _pby[pbi];
+    }
+
+    //.....Left edge (ξ = 0).....
+    for(var j = _nita; j > 0; j--, pbi++){
+        pinx[0][j] = _pbx[pbi];
+        piny[0][j] = _pby[pbi];
+    }
+
+    //----------Solve Laplace equation----------
+    for(var k = 0; k < 1000; k++) {
+        var errormax = 0;
+        for(var i = 1; i < _nxi; i++) {
+            for(var j = 1; j < _nita; j++) {
+                //.....Make Laplace equation.....
+                var xix = 0.5*(pinx[i + 1][j] - pinx[i - 1][j]);
+                var xiy = 0.5*(piny[i + 1][j] - piny[i - 1][j]);
+                var itax = 0.5*(pinx[i][j + 1] - pinx[i][j - 1]);
+                var itay = 0.5*(piny[i][j + 1] - piny[i][j - 1]);
+                var alpha = itax**2 + itay**2;
+                var beta = xix*itax + xiy*itay;
+                var ganma = xix**2 + xiy**2;
+
+                //.....Update values.....
+                var tmpx = pinx[i][j];
+                var tmpy = piny[i][j];
+                pinx[i][j] = 0.5*(alpha*(pinx[i + 1][j] + pinx[i - 1][j]) - 0.5*beta*(pinx[i + 1][j + 1] - pinx[i - 1][j + 1] - pinx[i + 1][j - 1] + pinx[i - 1][j - 1]) + ganma*(pinx[i][j + 1] + pinx[i][j - 1]))/(alpha + ganma);
+				piny[i][j] = 0.5*(alpha*(piny[i + 1][j] + piny[i - 1][j]) - 0.5*beta*(piny[i + 1][j + 1] - piny[i - 1][j + 1] - piny[i + 1][j - 1] + piny[i - 1][j - 1]) + ganma*(piny[i][j + 1] + piny[i][j - 1]))/(alpha + ganma);
+
+                //.....Update maximam error.....
+                var tmperror = (tmpx - pinx[i][j])**2 + (tmpy - piny[i][j])**2;
+                if(errormax < tmperror) {
+                    errormax = tmperror;
+                    
+                }
+            }
+        }
+
+        //.....Check convergence.....
+        console.log(errormax);
+        if(errormax < 1.0e-2) {
+            console.log(k, errormax);
+            break;
+        }
+    }
+
+    return [pinx, piny];
 }
