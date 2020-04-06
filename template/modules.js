@@ -93,11 +93,9 @@ class Point {
 
 //----------線要素----------
 class Line {
-    constructor(_p0, _p1, _color = "black", _width = 1) {
+    constructor(_p0, _p1) {
         this.p0 = _p0;
         this.p1 = _p1;
-        this.color = _color;
-        this.width = _width;
         this.p0.shared++;
         this.p1.shared++;
     }
@@ -106,9 +104,9 @@ class Line {
         return this.p0.Distance(this.p1);
     }
 
-    Draw(_ctx) {
-        _ctx.strokeStyle = this.color;
-        _ctx.lineWidth = this.width;
+    Draw(_ctx, _color = "aqua", _width = 1) {
+        _ctx.strokeStyle = _color;
+        _ctx.lineWidth = _width;
         _ctx.beginPath();
         _ctx.moveTo(this.p0.x, this.p0.y);
         _ctx.lineTo(this.p1.x, this.p1.y);
@@ -146,17 +144,15 @@ class Line {
 
 //----------円要素----------
 class Circle {
-    constructor(_p0, _r, _color = "black", _width = 1) {
+    constructor(_p0, _r) {
         this.p0 = _p0;
         this.r = _r
-        this.color = _color;
-        this.width = _width;
         this.p0.shared++;
     }
 
-    Draw(_ctx) {
-        _ctx.strokeStyle = this.color;
-        _ctx.lineWidth = this.width;
+    Draw(_ctx, _color = "aqua", _width = 1) {
+        _ctx.strokeStyle = _color;
+        _ctx.lineWidth = _width;
         _ctx.beginPath();
         _ctx.arc(this.p0.x, this.p0.y, this.r, 0, 2.0*Math.PI, 0);
         _ctx.stroke();
@@ -230,6 +226,7 @@ const ctx_xy_tmp = canvas_xy_tmp.getContext('2d');                              
 
 var elements = new Array();                                         //  xy座標系に作図された要素の配列
 var points = new Array();                                           //  xy座標系に作図された点の配列
+var paths = new Array();                                            //  xy座標系に作図された要素のうち閉曲線を成す要素の集合
 
 
 //----------線描画のイベント----------
@@ -402,6 +399,28 @@ function deleteelement(_edown){
 }
 
 
+//----------メッシュ生成のイベント----------
+function meshing(_edown){
+    //----------各要素について当たり判定----------
+    var rect = _edown.target.getBoundingClientRect();
+    var clickpoint = new Point(_edown.clientX - rect.left, _edown.clientY - rect.top);
+    var isneedcheck = false;
+    
+    for(var element of elements){
+        if(element.isHit(clickpoint)) {
+            element.Draw(ctx_xy_tmp, "lime", 3);
+            paths.push(element);
+            isneedcheck = true;
+            break;
+        }
+    }
+
+    //----------閉曲線か確認----------
+    if(isneedcheck) {
+        
+    }
+}
+
 
 
 
@@ -418,6 +437,11 @@ function initializeButton(){
     canvas_xy_tmp.removeEventListener('mousedown', drawline);
     canvas_xy_tmp.removeEventListener('mousedown', drawcircle);
     canvas_xy_tmp.removeEventListener('mousedown', deleteelement);
+    canvas_xy_tmp.removeEventListener('mousedown', meshing);
+
+    //----------その他----------
+    paths.splice(0, paths.length);
+    ctx_xy_tmp.clearRect(0, 0, canvas_xy_tmp.width, canvas_xy_tmp.height);
 }
 
 
@@ -427,8 +451,15 @@ function initializeCanvas(){
 
     //----------xy座標系----------
     drawcoordinate(canvas_xy_coordinate, ctx_xy_coordinate, "x", "y");
+    
+    ctx_xy.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
     for(var element of elements){
         element.Draw(ctx_xy);
+    }
+    
+    ctx_xy_tmp.clearRect(0, 0, canvas_xy_tmp.width, canvas_xy_tmp.height);
+    for(var element of paths){
+        element.Draw(ctx_xy_tmp, "lime", 3);
     }
 }
 
@@ -469,6 +500,7 @@ document.getElementById("button_mesh").onclick = function() {
     initializeButton();
     
     document.getElementById("icon_mesh").style.color = "lime";
+    canvas_xy_tmp.addEventListener('mousedown', meshing);
 };
 
 
