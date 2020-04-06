@@ -208,8 +208,44 @@ function drawcoordinate(_canvas, _ctx, _axis0, _axis1){
 
 
 //********************ξη座標系********************
-const canvas_xiita = document.getElementById('canvas_xiita');       //  ξη座標系の作図用canvas
-const ctx_xiita = canvas_xiita.getContext('2d');                    //  ξη座標系の作図用canvasのcontext
+const canvas_xiita = document.getElementById('canvas_xiita');                           //  ξη座標系の作図用canvas
+const ctx_xiita = canvas_xiita.getContext('2d');                                        //  ξη座標系の作図用canvasのcontext
+const canvas_xiita_coordinate = document.getElementById('canvas_xiita_coordinate');     //  ξη座標系の座標軸用canvas
+const ctx_xiita_coordinate = canvas_xiita_coordinate.getContext('2d');                  //  ξη座標系の座標軸用canvasのcontext
+
+const input_nxi = document.getElementById('input_nxi');
+const input_nita = document.getElementById('input_nita');
+
+
+function drawxiitamesh(){
+    //----------Initialize container----------
+    if(Number(input_nxi.value) == 0){
+        input_nxi.value = 1;
+    }
+    if(Number(input_nita.value) == 0){
+        input_nita.value = 1;
+    }
+    ctx_xiita.clearRect(0, 0, canvas_xiita.width, canvas_xiita.height);
+
+    //----------Draw mesh----------
+    var delta = 0.8*Math.min(canvas_xiita.width/Number(input_nxi.value), canvas_xiita.height/Number(input_nita.value));
+    var offsetxi = 0.5*(canvas_xiita.width - delta*Number(input_nxi.value));
+    var offsetita = 0.5*(canvas_xiita.height - delta*Number(input_nita.value));
+
+    ctx_xiita.strokeStyle = "aqua";
+    ctx_xiita.lineWidth = 1;
+    ctx_xiita.beginPath();
+    
+    for(var v = 0; v < Number(input_nxi.value) + 1; v++){
+        ctx_xiita.moveTo(v*delta + offsetxi, offsetita);
+        ctx_xiita.lineTo(v*delta + offsetxi, Number(input_nita.value)*delta + offsetita);
+    }
+    for(var v = 0; v < Number(input_nita.value) + 1; v++){
+        ctx_xiita.moveTo(offsetxi, v*delta + offsetita);
+        ctx_xiita.lineTo(Number(input_nxi.value)*delta + offsetxi, v*delta + offsetita);
+    }
+    ctx_xiita.stroke();
+}
 
 
 
@@ -414,20 +450,28 @@ function meshing(_edown){
         }
     }
 
-    //----------閉曲線か確認----------
+    
     if(isneedcheck) {
+        var isclosedpath = true;
+        ctx_xy_tmp.clearRect(0, 0, canvas_xy_tmp.width, canvas_xy_tmp.height);
+        for(var element of paths){
+            element.Draw(ctx_xy_tmp, "lime", 3);
+        }
+
+        //----------閉曲線か確認----------
         for(var i = 0; i < paths.length; i++){
             if(paths[i].p1 != paths[(i + 1)%paths.length].p0){
+                isclosedpath = false;
                 ctx_xy_tmp.clearRect(0, 0, canvas_xy_tmp.width, canvas_xy_tmp.height);
                 for(var element of paths){
                     element.Draw(ctx_xy_tmp, "red", 3);
                 }
-            } else {
-                ctx_xy_tmp.clearRect(0, 0, canvas_xy_tmp.width, canvas_xy_tmp.height);
-                for(var element of paths){
-                    element.Draw(ctx_xy_tmp, "lime", 3);
-                }
             }
+        }
+
+        //----------閉曲線ならメッシュを生成----------
+        if(isclosedpath) {
+            console.log("meshing!");
         }
     }
 }
@@ -458,7 +502,9 @@ function initializeButton(){
 
 function initializeCanvas(){
     //----------ξη座標系----------
-    drawcoordinate(canvas_xiita, ctx_xiita, "ξ", "η");
+    drawcoordinate(canvas_xiita_coordinate, ctx_xiita_coordinate, "ξ", "η");
+
+    drawxiitamesh();
 
     //----------xy座標系----------
     drawcoordinate(canvas_xy_coordinate, ctx_xy_coordinate, "x", "y");
@@ -538,9 +584,31 @@ function resizewindow(){
     
     canvas_xy_tmp.width = canvas_xy.width;
     canvas_xy_tmp.height = canvas_xy.height;
+
+    canvas_xiita.width = document.getElementById('canvas_xiita').parentNode.parentNode.clientWidth;
+    canvas_xiita.height = document.getElementById('canvas_xiita').parentNode.parentNode.clientHeight;
+
+    canvas_xiita_coordinate.width = canvas_xiita.width;
+    canvas_xiita_coordinate.height = canvas_xiita.height;
     
     initializeCanvas();
 }
 
 
 resizewindow();
+
+
+
+
+
+//********************インプットフォームイベント********************
+input_nxi.addEventListener('change', drawxiitamesh);
+input_nita.addEventListener('change', drawxiitamesh);
+
+
+
+
+//********************メッシング関数********************
+function mappedmeshing(){
+    
+}
