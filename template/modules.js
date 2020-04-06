@@ -428,7 +428,7 @@ function initializeCanvas(){
     //----------xy座標系----------
     drawcoordinate(canvas_xy_coordinate, ctx_xy_coordinate, "x", "y");
     for(var element of elements){
-        element.Draw();
+        element.Draw(ctx_xy);
     }
 }
 
