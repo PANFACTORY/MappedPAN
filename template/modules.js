@@ -56,27 +56,7 @@ function drawxiitamesh(){
 //********************イベント********************
 inputnxi.addEventListener('change', drawxiitamesh);
 inputnita.addEventListener('change', drawxiitamesh);
-window.addEventListener('resize', resizewindow, false);
 
-
-function resizewindow(){
-    //Need to modify
-    stagexiita.canvas.width = document.getElementById('canvasxiita').parentNode.parentNode.clientWidth;
-    stagexiita.canvas.height = document.getElementById('canvasxiita').parentNode.parentNode.clientHeight - document.getElementById('headerxiita').clientHeight - document.getElementById('footerxiita').clientHeight*1.2;
-    stagexiita.update();
-    
-    drawxiitacoordinate();
-    drawxiitamesh();
-    
-    stagexy.canvas.width = document.getElementById('canvasxy').parentNode.clientWidth;
-    stagexy.canvas.height = document.getElementById('canvasxy').parentNode.parentNode.clientHeight - document.getElementById('headerxy').clientHeight - document.getElementById('footerxiita').clientHeight*1.2;
-    stagexy.update();
-    
-    drawxycoordinate();
-}
-
-
-resizewindow();
 */
 
 
@@ -447,6 +427,9 @@ function initializeCanvas(){
 
     //----------xy座標系----------
     drawcoordinate(canvas_xy_coordinate, ctx_xy_coordinate, "x", "y");
+    for(var element of elements){
+        element.Draw();
+    }
 }
 
 
@@ -494,3 +477,27 @@ document.getElementById("button_export").onclick = function() {
     
     document.getElementById("icon_export").style.color = "lime";
 };
+
+
+
+
+
+//*********************画面イベント********************
+window.addEventListener('resize', resizewindow, false);
+
+
+function resizewindow(){
+    canvas_xy.width = document.getElementById('canvas_xy').parentNode.parentNode.clientWidth;
+    canvas_xy.height = document.getElementById('canvas_xy').parentNode.parentNode.clientHeight;
+    
+    canvas_xy_coordinate.width = canvas_xy.width;
+    canvas_xy_coordinate.height = canvas_xy.height;
+    
+    canvas_xy_tmp.width = canvas_xy.width;
+    canvas_xy_tmp.height = canvas_xy.height;
+    
+    initializeCanvas();
+}
+
+
+resizewindow();
