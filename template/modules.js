@@ -1,4 +1,15 @@
-//********************共通********************
+//*****************************************************************************
+//  Title       :   template/modules.js
+//  Author      :   Tanabe Yuta
+//  Date        :   2020/04/07
+//  Copyright   :   (C)2020 TanabeYuta
+//*****************************************************************************   
+
+
+
+
+
+//********************システム非依存********************
 
 //----------点要素----------
 class Point {
@@ -135,6 +146,167 @@ function drawcoordinate(_canvas, _ctx, _axis0, _axis1){
 }
 
 
+//----------メッシュ描画----------
+function drawmesh(_canvas, _ctx, _xs, _ys) {
+    //----------Initialize context----------
+    _ctx.clearRect(0, 0, _canvas.width, _canvas.height);
+
+    //----------Draw mesh----------
+    _ctx.strokeStyle = "white";
+    _ctx.lineWidth = 1;
+    _ctx.beginPath();
+    for(var i = 0; i < _xs.length - 1; i++) {
+        for(var j = 0; j < _xs[i].length - 1; j++) {
+            _ctx.moveTo(_xs[i][j], _ys[i][j]);
+            _ctx.lineTo(_xs[i + 1][j], _ys[i + 1][j]);
+            _ctx.moveTo(_xs[i][j], _ys[i][j]);
+            _ctx.lineTo(_xs[i][j + 1], _ys[i][j + 1]);
+        }
+    }
+    _ctx.stroke();
+}
+
+
+//----------メッシング関数----------
+function mappedmeshing(_nxi, _nita, _pbx, _pby) {
+    //----------Get array of xy----------
+    var pinx = new Array(_nxi + 1);
+    var piny = new Array(_nxi + 1);
+    for(var i = 0; i < _nxi + 1; i++) {
+        pinx[i] = new Array(_nita + 1).fill(0);
+        piny[i] = new Array(_nita + 1).fill(0);
+    }
+
+    //----------Set Dirichlet condition----------
+    var pbi = 0;
+    //.....Bottom edge (η = 0).....
+    for(var i = 0; i < _nxi; i++, pbi++){
+        pinx[i][0] = _pbx[pbi];
+        piny[i][0] = _pby[pbi];
+    }
+
+    //.....Right edge (ξ = ξmax).....
+    for(var j = 0; j < _nita; j++, pbi++){
+        pinx[_nxi][j] = _pbx[pbi];
+        piny[_nxi][j] = _pby[pbi];
+    }
+
+    //.....Top edge (η = ηmax).....
+    for(var i = _nxi; i > 0; i--, pbi++){
+        pinx[i][_nita] = _pbx[pbi];
+        piny[i][_nita] = _pby[pbi];
+    }
+
+    //.....Left edge (ξ = 0).....
+    for(var j = _nita; j > 0; j--, pbi++){
+        pinx[0][j] = _pbx[pbi];
+        piny[0][j] = _pby[pbi];
+    }
+
+    //----------Solve Laplace equation----------
+    for(var k = 0; k < 10000; k++) {
+        var errormax = 0;
+        for(var i = 1; i < _nxi; i++) {
+            for(var j = 1; j < _nita; j++) {
+                //.....Make Laplace equation.....
+                var xix = 0.5*(pinx[i + 1][j] - pinx[i - 1][j]);
+                var xiy = 0.5*(piny[i + 1][j] - piny[i - 1][j]);
+                var itax = 0.5*(pinx[i][j + 1] - pinx[i][j - 1]);
+                var itay = 0.5*(piny[i][j + 1] - piny[i][j - 1]);
+                var alpha = itax**2 + itay**2;
+                var beta = xix*itax + xiy*itay;
+                var ganma = xix**2 + xiy**2;
+
+                //.....Update values.....
+                var tmpx = pinx[i][j];
+                var tmpy = piny[i][j];
+                pinx[i][j] = 0.5*(alpha*(pinx[i + 1][j] + pinx[i - 1][j]) - 0.5*beta*(pinx[i + 1][j + 1] - pinx[i - 1][j + 1] - pinx[i + 1][j - 1] + pinx[i - 1][j - 1]) + ganma*(pinx[i][j + 1] + pinx[i][j - 1]))/(alpha + ganma);
+				piny[i][j] = 0.5*(alpha*(piny[i + 1][j] + piny[i - 1][j]) - 0.5*beta*(piny[i + 1][j + 1] - piny[i - 1][j + 1] - piny[i + 1][j - 1] + piny[i - 1][j - 1]) + ganma*(piny[i][j + 1] + piny[i][j - 1]))/(alpha + ganma);
+
+                //.....Update maximam error.....
+                var tmperror = (tmpx - pinx[i][j])**2 + (tmpy - piny[i][j])**2;
+                if(errormax < tmperror) {
+                    errormax = tmperror;
+                    
+                }
+            }
+        }
+
+        //.....Check convergence.....
+        if(errormax < 1.0e-5) {
+            console.log(k, errormax);
+            break;
+        }
+    }
+
+    return [pinx, piny];
+}
+
+
+
+
+
+//********************システム依存********************
+function initializeButton(){
+    //----------ボタンの色----------
+    document.getElementById("icon_line").style.color = "white";
+    document.getElementById("icon_circle").style.color = "white";
+    document.getElementById("icon_delete").style.color = "white";
+    document.getElementById("icon_mesh").style.color = "white";
+    document.getElementById("icon_export").style.color = "white";
+
+    //-----------イベントリスナーの解除----------
+    canvas_xy_tmp.removeEventListener('mousedown', drawline);
+    canvas_xy_tmp.removeEventListener('mousedown', drawcircle);
+    canvas_xy_tmp.removeEventListener('mousedown', deleteelement);
+    canvas_xy_tmp.removeEventListener('mousedown', meshing);
+
+    //----------その他----------
+    paths.splice(0, paths.length);
+    ctx_xy_tmp.clearRect(0, 0, canvas_xy_tmp.width, canvas_xy_tmp.height);
+    ctx_xy_mesh.clearRect(0, 0, canvas_xy_mesh.width, canvas_xy_mesh.height);
+}
+
+
+function initializeCanvas(){
+    //----------ξη座標系----------
+    canvas_xiita.width = document.getElementById('canvas_xiita').parentNode.parentNode.clientWidth;
+    canvas_xiita.height = document.getElementById('canvas_xiita').parentNode.parentNode.clientHeight;
+
+    canvas_xiita_coordinate.width = canvas_xiita.width;
+    canvas_xiita_coordinate.height = canvas_xiita.height;
+
+    drawcoordinate(canvas_xiita_coordinate, ctx_xiita_coordinate, "ξ", "η");
+
+    drawxiitamesh();
+
+    //----------xy座標系----------
+    canvas_xy.width = document.getElementById('canvas_xy').parentNode.parentNode.clientWidth;
+    canvas_xy.height = document.getElementById('canvas_xy').parentNode.parentNode.clientHeight;
+    
+    canvas_xy_mesh.width = canvas_xy.width;
+    canvas_xy_mesh.height = canvas_xy.height;
+
+    canvas_xy_coordinate.width = canvas_xy.width;
+    canvas_xy_coordinate.height = canvas_xy.height;
+    
+    canvas_xy_tmp.width = canvas_xy.width;
+    canvas_xy_tmp.height = canvas_xy.height;
+
+    drawcoordinate(canvas_xy_coordinate, ctx_xy_coordinate, "x", "y");
+    
+    ctx_xy.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
+    for(var element of elements){
+        element.Draw(ctx_xy);
+    }
+    
+    ctx_xy_tmp.clearRect(0, 0, canvas_xy_tmp.width, canvas_xy_tmp.height);
+    for(var element of paths){
+        element.Draw(ctx_xy_tmp, "lime", 3);
+    }
+}
+
+
 
 
 
@@ -183,20 +355,20 @@ function drawxiitamesh(){
 
 
 //********************xy座標系********************
-const canvas_xy = document.getElementById('canvas_xy');                             //  xy座標系の作図用canvas
-const ctx_xy = canvas_xy.getContext('2d');                                          //  xy座標系の作図用canvasのcontext
-const canvas_xy_mesh = document.getElementById('canvas_xy_mesh');                   //  xy座標系のメッシュ用canvas
-const ctx_xy_mesh = canvas_xy_mesh.getContext('2d');                                //  xy座標系のメッシュ用canvasのcontext
-const canvas_xy_coordinate = document.getElementById('canvas_xy_coordinate');       //  xy座標系の座標軸用canvas
-const ctx_xy_coordinate = canvas_xy_coordinate.getContext('2d');                    //  xy座標系の座標軸用canvasのcontext
-const canvas_xy_tmp = document.getElementById('canvas_xy_tmp');                     //  xy座標系の下書き用canvas
-const ctx_xy_tmp = canvas_xy_tmp.getContext('2d');                                  //  xy座標系の下書き用canvasのcontext
+const canvas_xy = document.getElementById('canvas_xy');                                 //  xy座標系の作図用canvas
+const ctx_xy = canvas_xy.getContext('2d');                                              //  xy座標系の作図用canvasのcontext
+const canvas_xy_mesh = document.getElementById('canvas_xy_mesh');                       //  xy座標系のメッシュ用canvas
+const ctx_xy_mesh = canvas_xy_mesh.getContext('2d');                                    //  xy座標系のメッシュ用canvasのcontext
+const canvas_xy_coordinate = document.getElementById('canvas_xy_coordinate');           //  xy座標系の座標軸用canvas
+const ctx_xy_coordinate = canvas_xy_coordinate.getContext('2d');                        //  xy座標系の座標軸用canvasのcontext
+const canvas_xy_tmp = document.getElementById('canvas_xy_tmp');                         //  xy座標系の下書き用canvas
+const ctx_xy_tmp = canvas_xy_tmp.getContext('2d');                                      //  xy座標系の下書き用canvasのcontext
 
 
-var elements = new Array();                                         //  xy座標系に作図された要素の配列
-var points = new Array();                                           //  xy座標系に作図された点の配列
-var paths = new Array();                                            //  xy座標系に作図された要素のうち閉曲線を成す要素の集合
-var meshs = new Array();                                            //  xy座標系に生成されたメッシュ
+var elements = new Array();                                                             //  xy座標系に作図された要素の配列
+var points = new Array();                                                               //  xy座標系に作図された点の配列
+var paths = new Array();                                                                //  xy座標系に作図された要素のうち閉曲線を成す要素の集合
+var meshs = new Array();                                                                //  xy座標系に生成されたメッシュ
 
 
 //----------線描画のイベント----------
@@ -422,79 +594,10 @@ function meshing(_edown){
 }
 
 
-function drawmesh(_canvas, _ctx, _xs, _ys) {
-    //----------Initialize context----------
-    _ctx.clearRect(0, 0, _canvas.width, _canvas.height);
-
-    //----------Draw mesh----------
-    _ctx.strokeStyle = "white";
-    _ctx.lineWidth = 1;
-    _ctx.beginPath();
-    for(var i = 0; i < _xs.length - 1; i++) {
-        for(var j = 0; j < _xs[i].length - 1; j++) {
-            _ctx.moveTo(_xs[i][j], _ys[i][j]);
-            _ctx.lineTo(_xs[i + 1][j], _ys[i + 1][j]);
-            _ctx.moveTo(_xs[i][j], _ys[i][j]);
-            _ctx.lineTo(_xs[i][j + 1], _ys[i][j + 1]);
-        }
-    }
-    _ctx.stroke();
-}
 
 
 
-
-//********************初期化関係********************
-function initializeButton(){
-    //----------ボタンの色----------
-    document.getElementById("icon_line").style.color = "white";
-    document.getElementById("icon_circle").style.color = "white";
-    document.getElementById("icon_delete").style.color = "white";
-    document.getElementById("icon_mesh").style.color = "white";
-    document.getElementById("icon_export").style.color = "white";
-
-    //-----------イベントリスナーの解除----------
-    canvas_xy_tmp.removeEventListener('mousedown', drawline);
-    canvas_xy_tmp.removeEventListener('mousedown', drawcircle);
-    canvas_xy_tmp.removeEventListener('mousedown', deleteelement);
-    canvas_xy_tmp.removeEventListener('mousedown', meshing);
-
-    //----------その他----------
-    paths.splice(0, paths.length);
-    ctx_xy_tmp.clearRect(0, 0, canvas_xy_tmp.width, canvas_xy_tmp.height);
-    ctx_xy_mesh.clearRect(0, 0, canvas_xy_mesh.width, canvas_xy_mesh.height);
-}
-
-
-function initializeCanvas(){
-    //----------ξη座標系----------
-    drawcoordinate(canvas_xiita_coordinate, ctx_xiita_coordinate, "ξ", "η");
-
-    drawxiitamesh();
-
-    //----------xy座標系----------
-    drawcoordinate(canvas_xy_coordinate, ctx_xy_coordinate, "x", "y");
-    
-    ctx_xy.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
-    for(var element of elements){
-        element.Draw(ctx_xy);
-    }
-    
-    ctx_xy_tmp.clearRect(0, 0, canvas_xy_tmp.width, canvas_xy_tmp.height);
-    for(var element of paths){
-        element.Draw(ctx_xy_tmp, "lime", 3);
-    }
-}
-
-
-initializeButton();
-initializeCanvas();
-
-
-
-
-
-//********************ボタンイベント********************
+//********************イベントリスナーの登録********************
 document.getElementById("button_line").onclick = function() {
     initializeButton();
 
@@ -534,120 +637,16 @@ document.getElementById("button_export").onclick = function() {
 };
 
 
+window.addEventListener('resize', initializeCanvas, false);
 
 
-
-//*********************画面イベント********************
-window.addEventListener('resize', resizewindow, false);
-
-
-function resizewindow(){
-    canvas_xy.width = document.getElementById('canvas_xy').parentNode.parentNode.clientWidth;
-    canvas_xy.height = document.getElementById('canvas_xy').parentNode.parentNode.clientHeight;
-    
-    canvas_xy_mesh.width = canvas_xy.width;
-    canvas_xy_mesh.height = canvas_xy.height;
-
-    canvas_xy_coordinate.width = canvas_xy.width;
-    canvas_xy_coordinate.height = canvas_xy.height;
-    
-    canvas_xy_tmp.width = canvas_xy.width;
-    canvas_xy_tmp.height = canvas_xy.height;
-
-    canvas_xiita.width = document.getElementById('canvas_xiita').parentNode.parentNode.clientWidth;
-    canvas_xiita.height = document.getElementById('canvas_xiita').parentNode.parentNode.clientHeight;
-
-    canvas_xiita_coordinate.width = canvas_xiita.width;
-    canvas_xiita_coordinate.height = canvas_xiita.height;
-    
-    initializeCanvas();
-}
-
-
-resizewindow();
-
-
-
-
-
-//********************インプットフォームイベント********************
 input_nxi.addEventListener('change', drawxiitamesh);
 input_nita.addEventListener('change', drawxiitamesh);
 
 
 
 
-//********************メッシング関数********************
-function mappedmeshing(_nxi, _nita, _pbx, _pby) {
-    //----------Get array of xy----------
-    var pinx = new Array(_nxi + 1);
-    var piny = new Array(_nxi + 1);
-    for(var i = 0; i < _nxi + 1; i++) {
-        pinx[i] = new Array(_nita + 1).fill(0);
-        piny[i] = new Array(_nita + 1).fill(0);
-    }
 
-    //----------Set Dirichlet condition----------
-    var pbi = 0;
-    //.....Bottom edge (η = 0).....
-    for(var i = 0; i < _nxi; i++, pbi++){
-        pinx[i][0] = _pbx[pbi];
-        piny[i][0] = _pby[pbi];
-    }
-
-    //.....Right edge (ξ = ξmax).....
-    for(var j = 0; j < _nita; j++, pbi++){
-        pinx[_nxi][j] = _pbx[pbi];
-        piny[_nxi][j] = _pby[pbi];
-    }
-
-    //.....Top edge (η = ηmax).....
-    for(var i = _nxi; i > 0; i--, pbi++){
-        pinx[i][_nita] = _pbx[pbi];
-        piny[i][_nita] = _pby[pbi];
-    }
-
-    //.....Left edge (ξ = 0).....
-    for(var j = _nita; j > 0; j--, pbi++){
-        pinx[0][j] = _pbx[pbi];
-        piny[0][j] = _pby[pbi];
-    }
-
-    //----------Solve Laplace equation----------
-    for(var k = 0; k < 10000; k++) {
-        var errormax = 0;
-        for(var i = 1; i < _nxi; i++) {
-            for(var j = 1; j < _nita; j++) {
-                //.....Make Laplace equation.....
-                var xix = 0.5*(pinx[i + 1][j] - pinx[i - 1][j]);
-                var xiy = 0.5*(piny[i + 1][j] - piny[i - 1][j]);
-                var itax = 0.5*(pinx[i][j + 1] - pinx[i][j - 1]);
-                var itay = 0.5*(piny[i][j + 1] - piny[i][j - 1]);
-                var alpha = itax**2 + itay**2;
-                var beta = xix*itax + xiy*itay;
-                var ganma = xix**2 + xiy**2;
-
-                //.....Update values.....
-                var tmpx = pinx[i][j];
-                var tmpy = piny[i][j];
-                pinx[i][j] = 0.5*(alpha*(pinx[i + 1][j] + pinx[i - 1][j]) - 0.5*beta*(pinx[i + 1][j + 1] - pinx[i - 1][j + 1] - pinx[i + 1][j - 1] + pinx[i - 1][j - 1]) + ganma*(pinx[i][j + 1] + pinx[i][j - 1]))/(alpha + ganma);
-				piny[i][j] = 0.5*(alpha*(piny[i + 1][j] + piny[i - 1][j]) - 0.5*beta*(piny[i + 1][j + 1] - piny[i - 1][j + 1] - piny[i + 1][j - 1] + piny[i - 1][j - 1]) + ganma*(piny[i][j + 1] + piny[i][j - 1]))/(alpha + ganma);
-
-                //.....Update maximam error.....
-                var tmperror = (tmpx - pinx[i][j])**2 + (tmpy - piny[i][j])**2;
-                if(errormax < tmperror) {
-                    errormax = tmperror;
-                    
-                }
-            }
-        }
-
-        //.....Check convergence.....
-        if(errormax < 1.0e-5) {
-            console.log(k, errormax);
-            break;
-        }
-    }
-
-    return [pinx, piny];
-}
+//********************初期の関数呼び出し********************
+initializeButton();
+initializeCanvas();
