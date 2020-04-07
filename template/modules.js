@@ -86,10 +86,11 @@ class Line {
 
 //----------円要素----------
 class Circle {
-    constructor(_p0, _p1, _p2) {
+    constructor(_p0, _p1, _p2, _direction) {
         this.p0 = _p0;      //  始点
         this.p1 = _p1;      //  終点
         this.p2 = _p2;      //  中心
+        this.direction = _direction;
         this.p0.shared++;
         this.p1.shared++;
         this.p2.shared++;
@@ -102,11 +103,7 @@ class Circle {
         _ctx.strokeStyle = _color;
         _ctx.lineWidth = _width;
         _ctx.beginPath();
-        if(this.startangle > this.endangle){
-            _ctx.arc(this.p2.x, this.p2.y, this.radius, this.startangle, this.endangle, true);
-        } else {
-            _ctx.arc(this.p2.x, this.p2.y, this.radius, this.startangle, this.endangle, false);
-        }
+        _ctx.arc(this.p2.x, this.p2.y, this.radius, this.startangle, this.endangle, this.direction);
         _ctx.stroke();
         _ctx.strokeStyle = "white";
         _ctx.beginPath();
@@ -135,8 +132,14 @@ class Circle {
 
     generatePointOnEdge(_n) {
         var points = new Array(_n);
+        var dangle = this.endangle - this.startangle;
+        if(this.direction == false) {
+            //dangle *= -1;
+        }
+        console.log(dangle*180/Math.PI);
+
         for(var i = 0; i < _n; i++){
-            var angle = (this.endangle - this.startangle)*i/_n + this.startangle;
+            var angle = dangle*i/_n + this.startangle;
             points[i] = [this.radius*Math.cos(angle) + this.p2.x, this.radius*Math.sin(angle) + this.p2.y];
         }
         return points;
@@ -261,7 +264,7 @@ function mappedmeshing(_nxi, _nita, _pbx, _pby) {
 
         //.....Check convergence.....
         if(errormax < 1.0e-5) {
-            console.log(k, errormax);
+            //console.log(k, errormax);
             break;
         }
     }
@@ -529,6 +532,7 @@ function drawcircle(_edown) {
         }
         
         var radius = centerpoint.Distance(startpoint);
+        var direction = 1;
         
         canvas_xy_tmp.removeEventListener('mousemove', guide1);
         canvas_xy_tmp.removeEventListener('mouseup', draw1);
@@ -546,6 +550,7 @@ function drawcircle(_edown) {
             for(var point of points) {
                 if(endpoint.Distance(point) < 5){
                     endpoint = point;
+                    direction *= -1;
                     break;
                 }
             }
@@ -558,10 +563,10 @@ function drawcircle(_edown) {
             ctx_xy_tmp.beginPath();
             ctx_xy_tmp.moveTo(startpoint.x, startpoint.y);
             ctx_xy_tmp.lineTo(centerpoint.x, centerpoint.y);
-            if(startangle > endangle){
-                ctx_xy_tmp.arc(centerpoint.x, centerpoint.y, radius, startangle, endangle, true);
-            } else {
+            if(direction > 0){
                 ctx_xy_tmp.arc(centerpoint.x, centerpoint.y, radius, startangle, endangle, false);
+            } else {
+                ctx_xy_tmp.arc(centerpoint.x, centerpoint.y, radius, startangle, endangle, true);
             }
             ctx_xy_tmp.moveTo(endpoint.x, endpoint.y);
             ctx_xy_tmp.lineTo(centerpoint.x, centerpoint.y);
@@ -589,7 +594,12 @@ function drawcircle(_edown) {
                 points.push(endpoint);
             }
 
-            var circle = new Circle(startpoint, endpoint, centerpoint);
+            if(direction < 0) {
+                direction = true;
+            } else {
+                direction = false;
+            }
+            var circle = new Circle(startpoint, endpoint, centerpoint, direction);
             circle.Draw(ctx_xy);
             elements.push(circle);
 
