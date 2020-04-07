@@ -97,8 +97,6 @@ class Circle {
         this.radius = this.p2.Distance(this.p0);
         this.startangle = Math.atan2(this.p0.y - this.p2.y, this.p0.x - this.p2.x);
         this.endangle = Math.atan2(this.p1.y - this.p2.y, this.p1.x - this.p2.x);
-
-        console.log(this.direction, 180*this.startangle/Math.PI, 180*this.endangle/Math.PI);
     }
 
     Draw(_ctx, _color = "aqua", _width = 1) {
@@ -135,11 +133,11 @@ class Circle {
     generatePointOnEdge(_n) {
         var points = new Array(_n);
         var dangle = this.endangle - this.startangle;
-        if((this.direction == false && dangle <= 0) || (this.direction == true && dangle > 0)) {
-            dangle *= -1;
+        if(!this.direction && dangle < 0){
+            dangle += 2*Math.PI;
+        } else if(this.direction && dangle > 0){
+            dangle -= 2*Math.PI;
         }
-        console.log(dangle*180/Math.PI);
-
         for(var i = 0; i < _n; i++){
             var angle = dangle*i/_n + this.startangle;
             points[i] = [this.radius*Math.cos(angle) + this.p2.x, this.radius*Math.sin(angle) + this.p2.y];
