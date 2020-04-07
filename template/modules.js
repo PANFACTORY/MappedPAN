@@ -97,6 +97,11 @@ class Circle {
         this.radius = this.p2.Distance(this.p0);
         this.startangle = Math.atan2(this.p0.y - this.p2.y, this.p0.x - this.p2.x);
         this.endangle = Math.atan2(this.p1.y - this.p2.y, this.p1.x - this.p2.x);
+        if(this.direction && this.startangle < this.endangle) {
+            this.endangle -= 2*Math.PI;
+        } else if(!this.direction && this.startangle > this.endangle) {
+            this.endangle += 2*Math.PI;
+        }
     }
 
     Draw(_ctx, _color = "aqua", _width = 1) {
@@ -118,7 +123,13 @@ class Circle {
     }
 
     isHit(_p) {
-        if(Math.abs(this.p2.Distance(_p) - this.radius) < 5){
+        var tmpangle = Math.atan2(_p.y - this.p2.y, _p.x - this.p2.x);
+        if(this.direction && this.startangle < tmpangle) {
+            tmpangle -= 2*Math.PI;
+        } else if(!this.direction && this.startangle > tmpangle) {
+            tmpangle += 2*Math.PI;
+        }
+        if(Math.abs(this.p2.Distance(_p) - this.radius) < 5 && ((!this.direction && this.startangle <= tmpangle && tmpangle <= this.endangle) || (this.direction && this.endangle <= tmpangle && tmpangle <= this.startangle))){
             return true;
         }
         return false;
@@ -133,11 +144,6 @@ class Circle {
     generatePointOnEdge(_n) {
         var points = new Array(_n);
         var dangle = this.endangle - this.startangle;
-        if(!this.direction && dangle < 0){
-            dangle += 2*Math.PI;
-        } else if(this.direction && dangle > 0){
-            dangle -= 2*Math.PI;
-        }
         for(var i = 0; i < _n; i++){
             var angle = dangle*i/_n + this.startangle;
             points[i] = [this.radius*Math.cos(angle) + this.p2.x, this.radius*Math.sin(angle) + this.p2.y];
@@ -578,7 +584,9 @@ function drawcircle(_edown) {
             for(var point of points) {
                 if(endpoint.Distance(point) < 5){
                     endpoint = point;
-                    direction = !direction;
+                    if(point == startpoint) {
+                        direction = !direction;
+                    }
                     break;
                 }
             }
