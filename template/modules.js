@@ -240,7 +240,7 @@ function mappedmeshing(_nxi, _nita, _pbx, _pby) {
     }
 
     //----------Solve Laplace equation----------
-    for(var k = 0; k < 10000; k++) {
+    for(var k = 0; k < 100000; k++) {
         var errormax = 0;
         for(var i = 1; i < _nxi; i++) {
             for(var j = 1; j < _nita; j++) {
@@ -269,12 +269,13 @@ function mappedmeshing(_nxi, _nita, _pbx, _pby) {
         }
 
         //.....Check convergence.....
-        if(errormax < 1.0e-5) {
-            //console.log(k, errormax);
-            break;
+        if(errormax < 1.0e-6) {
+            console.log(k, errormax);
+            return [pinx, piny];
         }
     }
 
+    console.log("convergence failed");
     return [pinx, piny];
 }
 
@@ -460,7 +461,7 @@ function drawline(_edown){
         ctx_xy_tmp.font = "15px 'Times New Roman'";
         ctx_xy_tmp.textAlign = "left";
         ctx_xy_tmp.textBaseline = "top";
-        ctx_xy_tmp.fillText(startpoint.Distance(endpoint), 0.5*(startpoint.x + endpoint.x), 0.5*(startpoint.y + endpoint.y));
+        ctx_xy_tmp.fillText(startpoint.Distance(endpoint).toFixed(2), 0.5*(startpoint.x + endpoint.x), 0.5*(startpoint.y + endpoint.y));
     }    
 
     function draw(_eup){
@@ -546,7 +547,7 @@ function drawcircle(_edown) {
         ctx_xy_tmp.font = "15px 'Times New Roman'";
         ctx_xy_tmp.textAlign = "left";
         ctx_xy_tmp.textBaseline = "top";
-        ctx_xy_tmp.fillText(centerpoint.Distance(edgepoint), 0.5*(centerpoint.x + edgepoint.x), 0.5*(centerpoint.y + edgepoint.y));
+        ctx_xy_tmp.fillText(centerpoint.Distance(edgepoint).toFixed(2), 0.5*(centerpoint.x + edgepoint.x), 0.5*(centerpoint.y + edgepoint.y));
     }    
 
     function draw1(_eup) {
@@ -620,7 +621,7 @@ function drawcircle(_edown) {
             ctx_xy_tmp.font = "15px 'Times New Roman'";
             ctx_xy_tmp.textAlign = "left";
             ctx_xy_tmp.textBaseline = "top";
-            ctx_xy_tmp.fillText(centerpoint.Distance(startpoint), 0.5*(centerpoint.x + startpoint.x), 0.5*(centerpoint.y + startpoint.y));
+            ctx_xy_tmp.fillText(centerpoint.Distance(startpoint).toFixed(2), 0.5*(centerpoint.x + startpoint.x), 0.5*(centerpoint.y + startpoint.y));
 
             var dangle = endangle - startangle;
             if(!direction && dangle < 0){
@@ -628,7 +629,7 @@ function drawcircle(_edown) {
             } else if(direction && dangle > 0){
                 dangle -= 2*Math.PI;
             }
-            ctx_xy_tmp.fillText(180*dangle/Math.PI, 0.5*(centerpoint.x + endpoint.x), 0.5*(centerpoint.y + endpoint.y));
+            ctx_xy_tmp.fillText((180*dangle/Math.PI).toFixed(2), 0.5*(centerpoint.x + endpoint.x), 0.5*(centerpoint.y + endpoint.y));
         }
     
         function draw2(_eup) {
