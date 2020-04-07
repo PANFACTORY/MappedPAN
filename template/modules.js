@@ -86,26 +86,42 @@ class Line {
 
 //----------円要素----------
 class Circle {
-    constructor(_p0, _r) {
-        this.p0 = _p0;
-        this.r = _r
+    constructor(_p0, _p1, _p2) {
+        this.p0 = _p0;      //  始点
+        this.p1 = _p1;      //  終点
+        this.p2 = _p2;      //  中心
         this.p0.shared++;
+        this.p1.shared++;
+        this.p2.shared++;
+        this.radius = this.p2.Distance(this.p0);
+        this.startangle = Math.atan2(this.p0.y - this.p2.y, this.p0.x - this.p2.x);
+        this.endangle = Math.atan2(this.p1.y - this.p2.y, this.p1.x - this.p2.x);
     }
 
     Draw(_ctx, _color = "aqua", _width = 1) {
         _ctx.strokeStyle = _color;
         _ctx.lineWidth = _width;
         _ctx.beginPath();
-        _ctx.arc(this.p0.x, this.p0.y, this.r, 0, 2.0*Math.PI, 0);
+        if(this.startangle > this.endangle){
+            _ctx.arc(this.p2.x, this.p2.y, this.radius, this.startangle, this.endangle, true);
+        } else {
+            _ctx.arc(this.p2.x, this.p2.y, this.radius, this.startangle, this.endangle, false);
+        }
         _ctx.stroke();
         _ctx.strokeStyle = "white";
         _ctx.beginPath();
         _ctx.arc(this.p0.x, this.p0.y, 5, 0, 2.0*Math.PI, 0);
         _ctx.stroke();
+        _ctx.beginPath();
+        _ctx.arc(this.p1.x, this.p1.y, 5, 0, 2.0*Math.PI, 0);
+        _ctx.stroke();
+        _ctx.beginPath();
+        _ctx.arc(this.p2.x, this.p2.y, 5, 0, 2.0*Math.PI, 0);
+        _ctx.stroke();
     }
 
     isHit(_p) {
-        if(Math.abs(this.p0.Distance(_p) - this.r) < 5){
+        if(Math.abs(this.p2.Distance(_p) - this.radius) < 5){
             return true;
         }
         return false;
@@ -113,6 +129,17 @@ class Circle {
 
     releasePoint() {
         this.p0.shared--;
+        this.p1.shared--;
+        this.p2.shared--;
+    }
+
+    generatePointOnEdge(_n) {
+        var points = new Array(_n);
+        for(var i = 0; i < _n; i++){
+            var angle = (this.endangle - this.startangle)*i/_n + this.startangle;
+            points[i] = [this.radius*Math.cos(angle) + this.p2.x, this.radius*Math.sin(angle) + this.p2.y];
+        }
+        return points;
     }
 }
 
@@ -432,7 +459,7 @@ function drawline(_edown){
             points.push(endpoint);
         }
         
-        var line = new Line(startpoint, endpoint, "aqua");
+        var line = new Line(startpoint, endpoint);
         line.Draw(ctx_xy);
         elements.push(line);
 
@@ -443,7 +470,7 @@ function drawline(_edown){
 
 
 //----------円描画のイベント----------
-function drawcircle(_edown){
+function drawcircle(_edown) {
     var rect = _edown.target.getBoundingClientRect();
     var centerpoint = new Point(_edown.clientX - rect.left, _edown.clientY - rect.top);
     var iscenterpointnew = true;
@@ -460,16 +487,17 @@ function drawcircle(_edown){
         points.push(centerpoint);
     }   
 
-    canvas_xy_tmp.addEventListener('mousemove', guide);
-    canvas_xy_tmp.addEventListener('mouseup', draw);
+    canvas_xy_tmp.removeEventListener('mousedown', drawcircle);
+    canvas_xy_tmp.addEventListener('mousemove', guide1);
+    canvas_xy_tmp.addEventListener('mouseup', draw1);
 
-    function guide(_etmp){
+    function guide1(_etmp) {
         ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
 
         var rect = _etmp.target.getBoundingClientRect();
         var edgepoint = new Point(_etmp.clientX - rect.left, _etmp.clientY - rect.top);
        
-        for(var point of points){
+        for(var point of points) {
             if(edgepoint.Distance(point) < 5){
                 edgepoint = point;
                 break;
@@ -479,30 +507,97 @@ function drawcircle(_edown){
         ctx_xy_tmp.strokeStyle = "gold";
         ctx_xy_tmp.lineWidth = 2;
         ctx_xy_tmp.beginPath();
-        ctx_xy_tmp.arc(centerpoint.x, centerpoint.y, centerpoint.Distance(edgepoint), 0, 2.0*Math.PI, 0);
+        ctx_xy_tmp.moveTo(centerpoint.x, centerpoint.y);
+        ctx_xy_tmp.lineTo(edgepoint.x, edgepoint.y);
         ctx_xy_tmp.stroke();
     }    
 
-    function draw(_eup){
-        ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
-
+    function draw1(_eup) {
         var rect = _eup.target.getBoundingClientRect();
-        var edgepoint = new Point(_eup.clientX - rect.left, _eup.clientY - rect.top);
+        var startpoint = new Point(_eup.clientX - rect.left, _eup.clientY - rect.top);
+        var isstartpointnew = true;
         
         for(var point of points){
-            if(edgepoint.Distance(point) < 5){
-                edgepoint = point;
+            if(startpoint.Distance(point) < 5){
+                startpoint = point;
                 break;
             }
         }
-        
-        var circle = new Circle(centerpoint, centerpoint.Distance(edgepoint), "aqua");
-        circle.Draw(ctx_xy);
-        elements.push(circle);
 
-        canvas_xy_tmp.removeEventListener('mousemove', guide);
-        canvas_xy_tmp.removeEventListener('mouseup', draw);
-    }    
+        if(isstartpointnew){
+            points.push(startpoint);
+        }
+        
+        var radius = centerpoint.Distance(startpoint);
+        
+        canvas_xy_tmp.removeEventListener('mousemove', guide1);
+        canvas_xy_tmp.removeEventListener('mouseup', draw1);
+        canvas_xy_tmp.addEventListener('mousemove', guide2);
+        canvas_xy_tmp.addEventListener('mouseup', draw2);
+
+        function guide2(_etmp) {
+            ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
+
+            var rect = _etmp.target.getBoundingClientRect();
+            var tmppoint = new Point(_etmp.clientX - rect.left, _etmp.clientY - rect.top);
+            var ratio = radius/centerpoint.Distance(tmppoint);
+            var endpoint = new Point(ratio*(_etmp.clientX - rect.left) + (1 - ratio)*centerpoint.x, ratio*(_etmp.clientY - rect.top) + (1 - ratio)*centerpoint.y);
+        
+            for(var point of points) {
+                if(endpoint.Distance(point) < 5){
+                    endpoint = point;
+                    break;
+                }
+            }
+
+            var startangle = Math.atan2(startpoint.y - centerpoint.y, startpoint.x - centerpoint.x);
+            var endangle = Math.atan2(endpoint.y - centerpoint.y, endpoint.x - centerpoint.x);
+
+            ctx_xy_tmp.strokeStyle = "gold";
+            ctx_xy_tmp.lineWidth = 2;
+            ctx_xy_tmp.beginPath();
+            ctx_xy_tmp.moveTo(startpoint.x, startpoint.y);
+            ctx_xy_tmp.lineTo(centerpoint.x, centerpoint.y);
+            if(startangle > endangle){
+                ctx_xy_tmp.arc(centerpoint.x, centerpoint.y, radius, startangle, endangle, true);
+            } else {
+                ctx_xy_tmp.arc(centerpoint.x, centerpoint.y, radius, startangle, endangle, false);
+            }
+            ctx_xy_tmp.moveTo(endpoint.x, endpoint.y);
+            ctx_xy_tmp.lineTo(centerpoint.x, centerpoint.y);
+            ctx_xy_tmp.stroke();
+        }
+    
+        function draw2(_eup) {
+            ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
+
+            var rect = _eup.target.getBoundingClientRect();
+            var tmppoint = new Point(_eup.clientX - rect.left, _eup.clientY - rect.top);
+            var ratio = radius/centerpoint.Distance(tmppoint);
+            var endpoint = new Point(ratio*(_eup.clientX - rect.left) + (1 - ratio)*centerpoint.x, ratio*(_eup.clientY - rect.top) + (1 - ratio)*centerpoint.y);
+            var isendpointnew = true;
+                    
+            for(var point of points){
+                if(endpoint.Distance(point) < 5){
+                    endpoint = point;
+                    isendpointnew = false;
+                    break;
+                }
+            }
+
+            if(isendpointnew){
+                points.push(endpoint);
+            }
+
+            var circle = new Circle(startpoint, endpoint, centerpoint);
+            circle.Draw(ctx_xy);
+            elements.push(circle);
+
+            canvas_xy_tmp.removeEventListener('mousemove', guide2);
+            canvas_xy_tmp.removeEventListener('mouseup', draw2);
+            canvas_xy_tmp.addEventListener('mousedown', drawcircle);
+        }
+    }
 }
 
 
