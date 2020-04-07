@@ -441,6 +441,20 @@ function drawline(_edown){
         ctx_xy_tmp.moveTo(startpoint.x, startpoint.y);
         ctx_xy_tmp.lineTo(endpoint.x, endpoint.y);
         ctx_xy_tmp.stroke();
+
+        ctx_xy_tmp.beginPath();
+        ctx_xy_tmp.arc(startpoint.x, startpoint.y, 2, 0, 2.0*Math.PI, 0);
+        ctx_xy_tmp.stroke();
+
+        ctx_xy_tmp.beginPath();
+        ctx_xy_tmp.arc(endpoint.x, endpoint.y, 2, 0, 2.0*Math.PI, 0);
+        ctx_xy_tmp.stroke();
+
+        ctx_xy_tmp.fillStyle = "gold";
+        ctx_xy_tmp.font = "15px 'Times New Roman'";
+        ctx_xy_tmp.textAlign = "left";
+        ctx_xy_tmp.textBaseline = "top";
+        ctx_xy_tmp.fillText(startpoint.Distance(endpoint), 0.5*(startpoint.x + endpoint.x), 0.5*(startpoint.y + endpoint.y));
     }    
 
     function draw(_eup){
@@ -513,6 +527,20 @@ function drawcircle(_edown) {
         ctx_xy_tmp.moveTo(centerpoint.x, centerpoint.y);
         ctx_xy_tmp.lineTo(edgepoint.x, edgepoint.y);
         ctx_xy_tmp.stroke();
+
+        ctx_xy_tmp.beginPath();
+        ctx_xy_tmp.arc(centerpoint.x, centerpoint.y, 2, 0, 2.0*Math.PI, 0);
+        ctx_xy_tmp.stroke();
+
+        ctx_xy_tmp.beginPath();
+        ctx_xy_tmp.arc(edgepoint.x, edgepoint.y, 2, 0, 2.0*Math.PI, 0);
+        ctx_xy_tmp.stroke();
+
+        ctx_xy_tmp.fillStyle = "gold";
+        ctx_xy_tmp.font = "15px 'Times New Roman'";
+        ctx_xy_tmp.textAlign = "left";
+        ctx_xy_tmp.textBaseline = "top";
+        ctx_xy_tmp.fillText(centerpoint.Distance(edgepoint), 0.5*(centerpoint.x + edgepoint.x), 0.5*(centerpoint.y + edgepoint.y));
     }    
 
     function draw1(_eup) {
@@ -567,6 +595,32 @@ function drawcircle(_edown) {
             ctx_xy_tmp.moveTo(endpoint.x, endpoint.y);
             ctx_xy_tmp.lineTo(centerpoint.x, centerpoint.y);
             ctx_xy_tmp.stroke();
+
+            ctx_xy_tmp.beginPath();
+            ctx_xy_tmp.arc(startpoint.x, startpoint.y, 2, 0, 2.0*Math.PI, 0);
+            ctx_xy_tmp.stroke();
+
+            ctx_xy_tmp.beginPath();
+            ctx_xy_tmp.arc(endpoint.x, endpoint.y, 2, 0, 2.0*Math.PI, 0);
+            ctx_xy_tmp.stroke();
+
+            ctx_xy_tmp.beginPath();
+            ctx_xy_tmp.arc(centerpoint.x, centerpoint.y, 2, 0, 2.0*Math.PI, 0);
+            ctx_xy_tmp.stroke();
+
+            ctx_xy_tmp.fillStyle = "gold";
+            ctx_xy_tmp.font = "15px 'Times New Roman'";
+            ctx_xy_tmp.textAlign = "left";
+            ctx_xy_tmp.textBaseline = "top";
+            ctx_xy_tmp.fillText(centerpoint.Distance(startpoint), 0.5*(centerpoint.x + startpoint.x), 0.5*(centerpoint.y + startpoint.y));
+
+            var dangle = endangle - startangle;
+            if(!direction && dangle < 0){
+                dangle += 2*Math.PI;
+            } else if(direction && dangle > 0){
+                dangle -= 2*Math.PI;
+            }
+            ctx_xy_tmp.fillText(180*dangle/Math.PI, 0.5*(centerpoint.x + endpoint.x), 0.5*(centerpoint.y + endpoint.y));
         }
     
         function draw2(_eup) {
