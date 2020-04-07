@@ -97,6 +97,8 @@ class Circle {
         this.radius = this.p2.Distance(this.p0);
         this.startangle = Math.atan2(this.p0.y - this.p2.y, this.p0.x - this.p2.x);
         this.endangle = Math.atan2(this.p1.y - this.p2.y, this.p1.x - this.p2.x);
+
+        console.log(this.direction, 180*this.startangle/Math.PI, 180*this.endangle/Math.PI);
     }
 
     Draw(_ctx, _color = "aqua", _width = 1) {
@@ -133,8 +135,8 @@ class Circle {
     generatePointOnEdge(_n) {
         var points = new Array(_n);
         var dangle = this.endangle - this.startangle;
-        if(this.direction == false) {
-            //dangle *= -1;
+        if((this.direction == false && dangle <= 0) || (this.direction == true && dangle > 0)) {
+            dangle *= -1;
         }
         console.log(dangle*180/Math.PI);
 
@@ -550,7 +552,7 @@ function drawcircle(_edown) {
             for(var point of points) {
                 if(endpoint.Distance(point) < 5){
                     endpoint = point;
-                    direction *= -1;
+                    direction = !direction;
                     break;
                 }
             }
@@ -563,11 +565,7 @@ function drawcircle(_edown) {
             ctx_xy_tmp.beginPath();
             ctx_xy_tmp.moveTo(startpoint.x, startpoint.y);
             ctx_xy_tmp.lineTo(centerpoint.x, centerpoint.y);
-            if(direction > 0){
-                ctx_xy_tmp.arc(centerpoint.x, centerpoint.y, radius, startangle, endangle, false);
-            } else {
-                ctx_xy_tmp.arc(centerpoint.x, centerpoint.y, radius, startangle, endangle, true);
-            }
+            ctx_xy_tmp.arc(centerpoint.x, centerpoint.y, radius, startangle, endangle, direction);
             ctx_xy_tmp.moveTo(endpoint.x, endpoint.y);
             ctx_xy_tmp.lineTo(centerpoint.x, centerpoint.y);
             ctx_xy_tmp.stroke();
@@ -594,11 +592,6 @@ function drawcircle(_edown) {
                 points.push(endpoint);
             }
 
-            if(direction < 0) {
-                direction = true;
-            } else {
-                direction = false;
-            }
             var circle = new Circle(startpoint, endpoint, centerpoint, direction);
             circle.Draw(ctx_xy);
             elements.push(circle);
