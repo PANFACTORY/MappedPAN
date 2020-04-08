@@ -476,9 +476,15 @@ function drawline(_edown){
 
             ctx_xy_tmp.fillStyle = "gold";
             ctx_xy_tmp.font = "15px 'Times New Roman'";
-            ctx_xy_tmp.textAlign = "left";
-            ctx_xy_tmp.textBaseline = "top";
-            ctx_xy_tmp.fillText(startpoint.Distance(endpoint).toFixed(2), 0.5*(startpoint.x + endpoint.x), 0.5*(startpoint.y + endpoint.y));
+            var angle = Math.atan2(endpoint.y - startpoint.y, endpoint.x - startpoint.x);
+            if((0 <= angle && angle <= 0.5*Math.PI) || angle <= -0.5*Math.PI) { 
+                ctx_xy_tmp.textAlign = "right";
+                ctx_xy_tmp.textBaseline = "top";
+            } else {
+                ctx_xy_tmp.textAlign = "left";
+                ctx_xy_tmp.textBaseline = "top";
+            }
+            ctx_xy_tmp.fillText(startpoint.Distance(endpoint).toFixed(2) + "(" + (endpoint.x - startpoint.x) + "," + (endpoint.y - startpoint.y) + ")", 0.5*(startpoint.x + endpoint.x), 0.5*(startpoint.y + endpoint.y));
         }    
 
         function draw(_eup){
@@ -566,9 +572,18 @@ function drawcircle(_edown) {
 
             ctx_xy_tmp.fillStyle = "gold";
             ctx_xy_tmp.font = "15px 'Times New Roman'";
-            ctx_xy_tmp.textAlign = "left";
-            ctx_xy_tmp.textBaseline = "top";
-            ctx_xy_tmp.fillText(centerpoint.Distance(edgepoint).toFixed(2), 0.5*(centerpoint.x + edgepoint.x), 0.5*(centerpoint.y + edgepoint.y));
+            var angle = Math.atan2(edgepoint.y - centerpoint.y, edgepoint.x - centerpoint.x);
+            if(angle < 0) {
+                angle += 2*Math.PI;
+            }
+            if((0 <= angle && angle <= 0.5*Math.PI) || (Math.PI <= angle && angle <= 1.5*Math.PI)) { 
+                ctx_xy_tmp.textAlign = "right";
+                ctx_xy_tmp.textBaseline = "top";
+            } else {
+                ctx_xy_tmp.textAlign = "left";
+                ctx_xy_tmp.textBaseline = "top";
+            }
+            ctx_xy_tmp.fillText(centerpoint.Distance(edgepoint).toFixed(2) + "(" + (180*angle/Math.PI).toFixed(2) + "deg)", 0.5*(centerpoint.x + edgepoint.x), 0.5*(centerpoint.y + edgepoint.y));
         }    
 
         function draw1(_eup) {
@@ -645,8 +660,13 @@ function drawcircle(_edown) {
 
                 ctx_xy_tmp.fillStyle = "gold";
                 ctx_xy_tmp.font = "15px 'Times New Roman'";
-                ctx_xy_tmp.textAlign = "left";
-                ctx_xy_tmp.textBaseline = "top";
+                if((0 <= startangle && startangle <= 0.5*Math.PI) || (Math.PI <= startangle && startangle <= 1.5*Math.PI)) { 
+                    ctx_xy_tmp.textAlign = "right";
+                    ctx_xy_tmp.textBaseline = "top";
+                } else {
+                    ctx_xy_tmp.textAlign = "left";
+                    ctx_xy_tmp.textBaseline = "top";
+                }
                 ctx_xy_tmp.fillText(centerpoint.Distance(startpoint).toFixed(2), 0.5*(centerpoint.x + startpoint.x), 0.5*(centerpoint.y + startpoint.y));
 
                 var dangle = endangle - startangle;
@@ -654,6 +674,14 @@ function drawcircle(_edown) {
                     dangle += 2*Math.PI;
                 } else if(direction && dangle > 0){
                     dangle -= 2*Math.PI;
+                }
+                var tmpangle = Math.atan2(endpoint.y - centerpoint.y, endpoint.x - centerpoint.x);
+                if((0 <= tmpangle && tmpangle <= 0.5*Math.PI) || tmpangle <= -0.5*Math.PI) { 
+                    ctx_xy_tmp.textAlign = "right";
+                    ctx_xy_tmp.textBaseline = "top";
+                } else {
+                    ctx_xy_tmp.textAlign = "left";
+                    ctx_xy_tmp.textBaseline = "top";
                 }
                 ctx_xy_tmp.fillText((180*dangle/Math.PI).toFixed(2) + "deg", 0.5*(centerpoint.x + endpoint.x), 0.5*(centerpoint.y + endpoint.y));
             }
