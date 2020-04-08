@@ -74,11 +74,18 @@ class Line {
         this.p1.shared--;
     }
 
-    generatePointOnEdge(_n) {
+    generatePointOnEdge(_n, _direction) {
         var points = new Array(_n);
-        for(var i = 0; i < _n; i++){
-            points[i] = [(this.p1.x - this.p0.x)*i/_n + this.p0.x, (this.p1.y - this.p0.y)*i/_n + this.p0.y];
+        if(_direction){
+            for(var i = 0; i < _n; i++){
+                points[i] = [(this.p1.x - this.p0.x)*i/_n + this.p0.x, (this.p1.y - this.p0.y)*i/_n + this.p0.y];
+            }
+        } else {
+            for(var i = 0; i < _n; i++){
+                points[i] = [(this.p0.x - this.p1.x)*i/_n + this.p1.x, (this.p0.y - this.p1.y)*i/_n + this.p1.y];
+            }
         }
+        
         return points;
     }
 }
@@ -141,12 +148,19 @@ class Circle {
         this.p2.shared--;
     }
 
-    generatePointOnEdge(_n) {
+    generatePointOnEdge(_n, _direction) {
         var points = new Array(_n);
         var dangle = this.endangle - this.startangle;
-        for(var i = 0; i < _n; i++){
-            var angle = dangle*i/_n + this.startangle;
-            points[i] = [this.radius*Math.cos(angle) + this.p2.x, this.radius*Math.sin(angle) + this.p2.y];
+        if(_direction){
+            for(var i = 0; i < _n; i++){
+                var angle = dangle*i/_n + this.startangle;
+                points[i] = [this.radius*Math.cos(angle) + this.p2.x, this.radius*Math.sin(angle) + this.p2.y];
+            }
+        } else {
+            for(var i = 0; i < _n; i++){
+                var angle = -dangle*i/_n + this.endangle;
+                points[i] = [this.radius*Math.cos(angle) + this.p2.x, this.radius*Math.sin(angle) + this.p2.y];
+            }
         }
         return points;
     }
@@ -300,6 +314,7 @@ function initializeButton(){
 
     //----------その他----------
     paths.splice(0, paths.length);
+    elementdirections.splice(0, elementdirections.length);
     ctx_xy_tmp.clearRect(0, 0, canvas_xy_tmp.width, canvas_xy_tmp.height);
     ctx_xy_mesh.clearRect(0, 0, canvas_xy_mesh.width, canvas_xy_mesh.height);
 }
@@ -405,6 +420,7 @@ const ctx_xy_tmp = canvas_xy_tmp.getContext('2d');                              
 var elements = new Array();                                                             //  xy座標系に作図された要素の配列
 var points = new Array();                                                               //  xy座標系に作図された点の配列
 var paths = new Array();                                                                //  xy座標系に作図された要素のうち閉曲線を成す要素の集合
+var elementdirections = new Array();                                                    //  xy座標系に作図された閉曲線を構成する要素の向き
 var meshs = new Array();                                                                //  xy座標系に生成されたメッシュ
 
 
@@ -722,36 +738,47 @@ function deleteelement(_edown){
 
 //----------メッシュ生成のイベント----------
 function meshing(_edown){
-    
-    //----------各要素について当たり判定----------
-    var rect = _edown.target.getBoundingClientRect();
-    var clickpoint = new Point(_edown.clientX - rect.left, _edown.clientY - rect.top);
-    var isneedcheck = false;
-    
-    for(var element of elements){
-        if(element.isHit(clickpoint)) {
-            paths.push(element);
-            isneedcheck = true;
-            break;
+    //----------左クリック→閉曲線構成要素リストに要素を追加----------
+    if(_edown.button == 0) {
+        var rect = _edown.target.getBoundingClientRect();
+        var clickpoint = new Point(_edown.clientX - rect.left, _edown.clientY - rect.top);
+        
+        for(var element of elements){
+            if(element.isHit(clickpoint)) {
+                if(paths[paths.length - 1] != element) {
+                    paths.push(element);
+                    elementdirections.push(true);
+                } else if(paths.length > 0) {
+                    elementdirections[paths.length - 1] = !elementdirections[paths.length - 1];
+                }
+                break;
+            }
+        }
+
+        ctx_xy_tmp.clearRect(0, 0, canvas_xy_tmp.width, canvas_xy_tmp.height);
+        for(var i = 0; i < paths.length; i++){
+            if(elementdirections[i]) {
+                paths[i].Draw(ctx_xy_tmp, "aqua", 3);
+            } else {
+                paths[i].Draw(ctx_xy_tmp, "maroon", 3);
+            }
         }
     }
 
-    
-    if(isneedcheck) {
+    //----------右クリック→閉曲線の検証とメッシング----------
+    else if(_edown.button == 2) {
+        //----------閉曲線か確認----------
         var isclosedpath = true;
         ctx_xy_tmp.clearRect(0, 0, canvas_xy_tmp.width, canvas_xy_tmp.height);
-        for(var element of paths){
-            element.Draw(ctx_xy_tmp, "lime", 3);
-        }
-
-        //----------閉曲線か確認----------
         for(var i = 0; i < paths.length; i++){
-            if(paths[i].p1 != paths[(i + 1)%paths.length].p0){
+            if((elementdirections[i] && elementdirections[(i + 1)%paths.length] && paths[i].p1 == paths[(i + 1)%paths.length].p0) 
+            || (!elementdirections[i] && elementdirections[(i + 1)%paths.length] && paths[i].p0 == paths[(i + 1)%paths.length].p0) 
+            || (!elementdirections[i] && !elementdirections[(i + 1)%paths.length] && paths[i].p0 == paths[(i + 1)%paths.length].p1) 
+            || (elementdirections[i] && !elementdirections[(i + 1)%paths.length] && paths[i].p1 == paths[(i + 1)%paths.length].p1)) {
+                paths[i].Draw(ctx_xy_tmp, "lime", 3);
+            } else {
                 isclosedpath = false;
-                ctx_xy_tmp.clearRect(0, 0, canvas_xy_tmp.width, canvas_xy_tmp.height);
-                for(var element of paths){
-                    element.Draw(ctx_xy_tmp, "red", 3);
-                }
+                paths[i].Draw(ctx_xy_tmp, "red", 3);
             }
         }
 
@@ -761,7 +788,7 @@ function meshing(_edown){
             var pby = new Array();
             var pbn = [Number(input_nxi.value), Number(input_nita.value), Number(input_nxi.value), Number(input_nita.value)]
             for(var i = 0; i < paths.length; i++) {
-                var points = paths[i].generatePointOnEdge(pbn[i]);
+                var points = paths[i].generatePointOnEdge(pbn[i], elementdirections[i]);
                 for(var point of points){
                     pbx.push(point[0]);
                     pby.push(point[1]);
