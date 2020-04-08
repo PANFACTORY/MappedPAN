@@ -410,7 +410,7 @@ var meshs = new Array();                                                        
 
 //----------線描画のイベント----------
 function drawline(_edown){
-    if(_eup.button == 0) {
+    if(_edown.button == 0) {
         var rect = _edown.target.getBoundingClientRect();
         var startpoint = new Point(_edown.clientX - rect.left, _edown.clientY - rect.top);
         var isstartpointnew = true;
@@ -466,30 +466,32 @@ function drawline(_edown){
         }    
 
         function draw(_eup){
-            ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
+            if(_eup.button == 0) {
+                ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
 
-            var rect = _eup.target.getBoundingClientRect();
-            var endpoint = new Point(_eup.clientX - rect.left, _eup.clientY - rect.top);
-            var isendpointnew = true;
+                var rect = _eup.target.getBoundingClientRect();
+                var endpoint = new Point(_eup.clientX - rect.left, _eup.clientY - rect.top);
+                var isendpointnew = true;
 
-            for(var point of points){
-                if(endpoint.Distance(point) < 5){
-                    endpoint = point;
-                    isendpointnew = false;
-                    break;
+                for(var point of points){
+                    if(endpoint.Distance(point) < 5){
+                        endpoint = point;
+                        isendpointnew = false;
+                        break;
+                    }
                 }
-            }
 
-            if(isendpointnew){
-                points.push(endpoint);
-            }
-            
-            var line = new Line(startpoint, endpoint);
-            line.Draw(ctx_xy);
-            elements.push(line);
+                if(isendpointnew){
+                    points.push(endpoint);
+                }
+                
+                var line = new Line(startpoint, endpoint);
+                line.Draw(ctx_xy);
+                elements.push(line);
 
-            canvas_xy_tmp.removeEventListener('mousemove', guide);
-            canvas_xy_tmp.removeEventListener('mouseup', draw);
+                canvas_xy_tmp.removeEventListener('mousemove', guide);
+                canvas_xy_tmp.removeEventListener('mouseup', draw);
+            }
         }
     } 
 }
@@ -720,6 +722,7 @@ function deleteelement(_edown){
 
 //----------メッシュ生成のイベント----------
 function meshing(_edown){
+    
     //----------各要素について当たり判定----------
     var rect = _edown.target.getBoundingClientRect();
     var clickpoint = new Point(_edown.clientX - rect.left, _edown.clientY - rect.top);
