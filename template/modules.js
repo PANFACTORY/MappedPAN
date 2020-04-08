@@ -197,7 +197,7 @@ function drawcoordinate(_canvas, _ctx, _axis0, _axis1){
 
 
 //----------メッシュ描画----------
-function drawmesh(_canvas, _ctx, _xs, _ys) {
+function drawmesh(_canvas, _ctx, _meshs) {
     //----------Initialize context----------
     _ctx.clearRect(0, 0, _canvas.width, _canvas.height);
 
@@ -205,12 +205,12 @@ function drawmesh(_canvas, _ctx, _xs, _ys) {
     _ctx.strokeStyle = "white";
     _ctx.lineWidth = 1;
     _ctx.beginPath();
-    for(var i = 0; i < _xs.length - 1; i++) {
-        for(var j = 0; j < _xs[i].length - 1; j++) {
-            _ctx.moveTo(_xs[i][j], _ys[i][j]);
-            _ctx.lineTo(_xs[i + 1][j], _ys[i + 1][j]);
-            _ctx.moveTo(_xs[i][j], _ys[i][j]);
-            _ctx.lineTo(_xs[i][j + 1], _ys[i][j + 1]);
+    for(var i = 0; i < _meshs.length - 1; i++) {
+        for(var j = 0; j < _meshs[i].length - 1; j++) {
+            _ctx.moveTo(_meshs[i][j][0], _meshs[i][j][1]);
+            _ctx.lineTo(_meshs[i + 1][j][0], _meshs[i + 1][j][1]);
+            _ctx.moveTo(_meshs[i][j][0], _meshs[i][j][1]);
+            _ctx.lineTo(_meshs[i][j + 1][0], _meshs[i][j + 1][1]);
         }
     }
     _ctx.stroke();
@@ -220,37 +220,38 @@ function drawmesh(_canvas, _ctx, _xs, _ys) {
 //----------メッシング関数----------
 function mappedmeshing(_nxi, _nita, _pbx, _pby) {
     //----------Get array of xy----------
-    var pinx = new Array(_nxi + 1);
-    var piny = new Array(_nxi + 1);
+    var pin = new Array(_nxi + 1);
     for(var i = 0; i < _nxi + 1; i++) {
-        pinx[i] = new Array(_nita + 1).fill(0);
-        piny[i] = new Array(_nita + 1).fill(0);
+        pin[i] = new Array(_nita + 1);
+        for(var j = 0; j < _nita + 1; j++) {
+            pin[i][j] = new Array(2).fill(0);
+        }
     }
 
     //----------Set Dirichlet condition----------
     var pbi = 0;
     //.....Bottom edge (η = 0).....
     for(var i = 0; i < _nxi; i++, pbi++){
-        pinx[i][0] = _pbx[pbi];
-        piny[i][0] = _pby[pbi];
+        pin[i][0][0] = _pbx[pbi];
+        pin[i][0][1] = _pby[pbi];
     }
 
     //.....Right edge (ξ = ξmax).....
     for(var j = 0; j < _nita; j++, pbi++){
-        pinx[_nxi][j] = _pbx[pbi];
-        piny[_nxi][j] = _pby[pbi];
+        pin[_nxi][j][0] = _pbx[pbi];
+        pin[_nxi][j][1] = _pby[pbi];
     }
 
     //.....Top edge (η = ηmax).....
     for(var i = _nxi; i > 0; i--, pbi++){
-        pinx[i][_nita] = _pbx[pbi];
-        piny[i][_nita] = _pby[pbi];
+        pin[i][_nita][0] = _pbx[pbi];
+        pin[i][_nita][1] = _pby[pbi];
     }
 
     //.....Left edge (ξ = 0).....
     for(var j = _nita; j > 0; j--, pbi++){
-        pinx[0][j] = _pbx[pbi];
-        piny[0][j] = _pby[pbi];
+        pin[0][j][0] = _pbx[pbi];
+        pin[0][j][1] = _pby[pbi];
     }
 
     //----------Solve Laplace equation----------
@@ -259,38 +260,37 @@ function mappedmeshing(_nxi, _nita, _pbx, _pby) {
         for(var i = 1; i < _nxi; i++) {
             for(var j = 1; j < _nita; j++) {
                 //.....Make Laplace equation.....
-                var xix = 0.5*(pinx[i + 1][j] - pinx[i - 1][j]);
-                var xiy = 0.5*(piny[i + 1][j] - piny[i - 1][j]);
-                var itax = 0.5*(pinx[i][j + 1] - pinx[i][j - 1]);
-                var itay = 0.5*(piny[i][j + 1] - piny[i][j - 1]);
+                var xix = 0.5*(pin[i + 1][j][0] - pin[i - 1][j][0]);
+                var xiy = 0.5*(pin[i + 1][j][1] - pin[i - 1][j][1]);
+                var itax = 0.5*(pin[i][j + 1][0] - pin[i][j - 1][0]);
+                var itay = 0.5*(pin[i][j + 1][1] - pin[i][j - 1][1]);
                 var alpha = itax**2 + itay**2;
                 var beta = xix*itax + xiy*itay;
                 var ganma = xix**2 + xiy**2;
 
                 //.....Update values.....
-                var tmpx = pinx[i][j];
-                var tmpy = piny[i][j];
-                pinx[i][j] = 0.5*(alpha*(pinx[i + 1][j] + pinx[i - 1][j]) - 0.5*beta*(pinx[i + 1][j + 1] - pinx[i - 1][j + 1] - pinx[i + 1][j - 1] + pinx[i - 1][j - 1]) + ganma*(pinx[i][j + 1] + pinx[i][j - 1]))/(alpha + ganma);
-				piny[i][j] = 0.5*(alpha*(piny[i + 1][j] + piny[i - 1][j]) - 0.5*beta*(piny[i + 1][j + 1] - piny[i - 1][j + 1] - piny[i + 1][j - 1] + piny[i - 1][j - 1]) + ganma*(piny[i][j + 1] + piny[i][j - 1]))/(alpha + ganma);
+                var tmpx = pin[i][j][0];
+                var tmpy = pin[i][j][1];
+                pin[i][j][0] = 0.5*(alpha*(pin[i + 1][j][0] + pin[i - 1][j][0]) - 0.5*beta*(pin[i + 1][j + 1][0] - pin[i - 1][j + 1][0] - pin[i + 1][j - 1][0] + pin[i - 1][j - 1][0]) + ganma*(pin[i][j + 1][0] + pin[i][j - 1][0]))/(alpha + ganma);
+				pin[i][j][1] = 0.5*(alpha*(pin[i + 1][j][1] + pin[i - 1][j][1]) - 0.5*beta*(pin[i + 1][j + 1][1] - pin[i - 1][j + 1][1] - pin[i + 1][j - 1][1] + pin[i - 1][j - 1][1]) + ganma*(pin[i][j + 1][1] + pin[i][j - 1][1]))/(alpha + ganma);
 
                 //.....Update maximam error.....
-                var tmperror = (tmpx - pinx[i][j])**2 + (tmpy - piny[i][j])**2;
+                var tmperror = (tmpx - pin[i][j][0])**2 + (tmpy - pin[i][j][1])**2;
                 if(errormax < tmperror) {
-                    errormax = tmperror;
-                    
+                    errormax = tmperror;      
                 }
             }
         }
 
         //.....Check convergence.....
-        if(errormax < 1.0e-6) {
+        if(errormax < 1.0e-10) {
             console.log(k, errormax);
-            return [pinx, piny];
+            return pin;
         }
     }
 
     console.log("convergence failed");
-    return [pinx, piny];
+    return pin;
 }
 
 
@@ -315,6 +315,7 @@ function initializeButton(){
     //----------その他----------
     paths.splice(0, paths.length);
     elementdirections.splice(0, elementdirections.length);
+    meshs.splice(0, meshs.length);
     ctx_xy_tmp.clearRect(0, 0, canvas_xy_tmp.width, canvas_xy_tmp.height);
     ctx_xy_mesh.clearRect(0, 0, canvas_xy_mesh.width, canvas_xy_mesh.height);
 }
@@ -356,6 +357,9 @@ function initializeCanvas(){
     for(var element of paths){
         element.Draw(ctx_xy_tmp, "lime", 3);
     }
+
+    ctx_xy_mesh.clearRect(0, 0, canvas_xy_mesh.width, canvas_xy_mesh.height);
+    drawmesh(canvas_xy_mesh, ctx_xy_mesh, meshs);
 }
 
 
@@ -822,9 +826,52 @@ function meshing(_edown){
                     pby.push(point[1]);
                 }
             }
-            var mesh = mappedmeshing(Number(input_nxi.value), Number(input_nita.value), pbx, pby);
-            drawmesh(canvas_xy_mesh, ctx_xy_mesh, mesh[0], mesh[1]);
+            meshs = mappedmeshing(Number(input_nxi.value), Number(input_nita.value), pbx, pby);
+            drawmesh(canvas_xy_mesh, ctx_xy_mesh, meshs);
         }
+    }
+}
+
+
+//----------メッシュ出力のイベント----------
+function downloadmesh() {
+    var header = "# vtk DataFile Version 4.1\nvtk output\nASCII\nDATASET UNSTRUCTURED_GRID\n";
+
+    if(Number(input_nxi.value) == 0){
+        input_nxi.value = 1;
+    }
+    if(Number(input_nita.value) == 0){
+        input_nita.value = 1;
+    }
+
+    var nxi = Number(input_nxi.value) + 1;
+    var nita = Number(input_nita.value) + 1;
+
+    var pointdata = "\nPOINTS\t" + (nxi*nita) + "\tfloat\n";
+    for (var i = 0; i < nxi; i++) {
+        for (var j = 0; j < nita; j++) {
+            pointdata += meshs[i][j][0] + "\t" + meshs[i][j][1] + "\t0\n";
+        }
+    }
+
+    var celldata = "\nCELLS " + ((nxi - 1)*(nita - 1)) + "\t" + (5*(nxi - 1)*(nita - 1)) + "\n";
+    for (var i = 0; i < nxi - 1; i++) {
+		for (var j = 0; j < nita - 1; j++) {
+			celldata += "4 " + (nita*i + j) + "\t" + (nita*i + j + 1) + "\t" + (nita*(i + 1) + j + 1) + "\t" + (nita*(i + 1) + j) + "\n";
+		}
+    }
+    
+    var celltypedata = "\nCELL_TYPES\t" + ((nxi - 1)*(nita - 1)) + "\n";
+	for (var i = 0; i < (nxi - 1)*(nita - 1); i++) {
+		celltypedata += "9\n";
+	}
+
+    var blob = new Blob([ header + pointdata + celldata + celltypedata ], { "type" : "text/plain" });
+    if (window.navigator.msSaveBlob) {      //  for IE
+        window.navigator.msSaveBlob(blob, "mesh.vtk"); 
+        window.navigator.msSaveOrOpenBlob(blob, "mesh.vtk"); 
+    } else {                                //  for Chrome, Firefox 
+        document.getElementById("button_export").href = window.URL.createObjectURL(blob);
     }
 }
 
@@ -862,13 +909,6 @@ document.getElementById("button_mesh").onclick = function() {
     
     document.getElementById("icon_mesh").style.color = "lime";
     canvas_xy_tmp.addEventListener('mousedown', meshing);
-};
-
-
-document.getElementById("button_export").onclick = function() {
-    initializeButton();
-    
-    document.getElementById("icon_export").style.color = "lime";
 };
 
 
