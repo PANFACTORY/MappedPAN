@@ -97,9 +97,9 @@ class Circle {
         this.radius = this.p2.Distance(this.p0);
         this.startangle = Math.atan2(this.p0.y - this.p2.y, this.p0.x - this.p2.x);
         this.endangle = Math.atan2(this.p1.y - this.p2.y, this.p1.x - this.p2.x);
-        if(this.direction && this.startangle < this.endangle) {
+        if(this.direction && this.startangle <= this.endangle) {
             this.endangle -= 2*Math.PI;
-        } else if(!this.direction && this.startangle > this.endangle) {
+        } else if(!this.direction && this.startangle >= this.endangle) {
             this.endangle += 2*Math.PI;
         }
     }
@@ -410,199 +410,44 @@ var meshs = new Array();                                                        
 
 //----------線描画のイベント----------
 function drawline(_edown){
-    var rect = _edown.target.getBoundingClientRect();
-    var startpoint = new Point(_edown.clientX - rect.left, _edown.clientY - rect.top);
-    var isstartpointnew = true;
-
-    for(var point of points){
-        if(startpoint.Distance(point) < 5){
-            startpoint = point;                 //  delete必要？
-            isstartpointnew = false;
-            break;
-        }
-    }
-
-    if(isstartpointnew){
-        points.push(startpoint);
-    }   
-
-    canvas_xy_tmp.addEventListener('mousemove', guide);
-    canvas_xy_tmp.addEventListener('mouseup', draw);
-
-    function guide(_etmp){
-        ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
-
-        var rect = _etmp.target.getBoundingClientRect();
-        var endpoint = new Point(_etmp.clientX - rect.left, _etmp.clientY - rect.top);
-       
-        for(var point of points){
-            if(endpoint.Distance(point) < 5){
-                endpoint = point;
-                break;
-            }
-        }
-        
-        ctx_xy_tmp.strokeStyle = "gold";
-        ctx_xy_tmp.lineWidth = 2;
-        ctx_xy_tmp.beginPath();
-        ctx_xy_tmp.moveTo(startpoint.x, startpoint.y);
-        ctx_xy_tmp.lineTo(endpoint.x, endpoint.y);
-        ctx_xy_tmp.stroke();
-
-        ctx_xy_tmp.beginPath();
-        ctx_xy_tmp.arc(startpoint.x, startpoint.y, 2, 0, 2.0*Math.PI, 0);
-        ctx_xy_tmp.stroke();
-
-        ctx_xy_tmp.beginPath();
-        ctx_xy_tmp.arc(endpoint.x, endpoint.y, 2, 0, 2.0*Math.PI, 0);
-        ctx_xy_tmp.stroke();
-
-        ctx_xy_tmp.fillStyle = "gold";
-        ctx_xy_tmp.font = "15px 'Times New Roman'";
-        ctx_xy_tmp.textAlign = "left";
-        ctx_xy_tmp.textBaseline = "top";
-        ctx_xy_tmp.fillText(startpoint.Distance(endpoint).toFixed(2), 0.5*(startpoint.x + endpoint.x), 0.5*(startpoint.y + endpoint.y));
-    }    
-
-    function draw(_eup){
-        ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
-
-        var rect = _eup.target.getBoundingClientRect();
-        var endpoint = new Point(_eup.clientX - rect.left, _eup.clientY - rect.top);
-        var isendpointnew = true;
-
-        for(var point of points){
-            if(endpoint.Distance(point) < 5){
-                endpoint = point;
-                isendpointnew = false;
-                break;
-            }
-        }
-
-        if(isendpointnew){
-            points.push(endpoint);
-        }
-        
-        var line = new Line(startpoint, endpoint);
-        line.Draw(ctx_xy);
-        elements.push(line);
-
-        canvas_xy_tmp.removeEventListener('mousemove', guide);
-        canvas_xy_tmp.removeEventListener('mouseup', draw);
-    }    
-}
-
-
-//----------円描画のイベント----------
-function drawcircle(_edown) {
-    var rect = _edown.target.getBoundingClientRect();
-    var centerpoint = new Point(_edown.clientX - rect.left, _edown.clientY - rect.top);
-    var iscenterpointnew = true;
-
-    for(var point of points){
-        if(centerpoint.Distance(point) < 5){
-            centerpoint = point;                        //  delete必要？
-            iscenterpointnew = false;
-            break;
-        }
-    }
-
-    if(iscenterpointnew){
-        points.push(centerpoint);
-    }   
-
-    canvas_xy_tmp.removeEventListener('mousedown', drawcircle);
-    canvas_xy_tmp.addEventListener('mousemove', guide1);
-    canvas_xy_tmp.addEventListener('mouseup', draw1);
-
-    function guide1(_etmp) {
-        ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
-
-        var rect = _etmp.target.getBoundingClientRect();
-        var edgepoint = new Point(_etmp.clientX - rect.left, _etmp.clientY - rect.top);
-       
-        for(var point of points) {
-            if(edgepoint.Distance(point) < 5){
-                edgepoint = point;
-                break;
-            }
-        }
-        
-        ctx_xy_tmp.strokeStyle = "gold";
-        ctx_xy_tmp.lineWidth = 2;
-        ctx_xy_tmp.beginPath();
-        ctx_xy_tmp.moveTo(centerpoint.x, centerpoint.y);
-        ctx_xy_tmp.lineTo(edgepoint.x, edgepoint.y);
-        ctx_xy_tmp.stroke();
-
-        ctx_xy_tmp.beginPath();
-        ctx_xy_tmp.arc(centerpoint.x, centerpoint.y, 2, 0, 2.0*Math.PI, 0);
-        ctx_xy_tmp.stroke();
-
-        ctx_xy_tmp.beginPath();
-        ctx_xy_tmp.arc(edgepoint.x, edgepoint.y, 2, 0, 2.0*Math.PI, 0);
-        ctx_xy_tmp.stroke();
-
-        ctx_xy_tmp.fillStyle = "gold";
-        ctx_xy_tmp.font = "15px 'Times New Roman'";
-        ctx_xy_tmp.textAlign = "left";
-        ctx_xy_tmp.textBaseline = "top";
-        ctx_xy_tmp.fillText(centerpoint.Distance(edgepoint).toFixed(2), 0.5*(centerpoint.x + edgepoint.x), 0.5*(centerpoint.y + edgepoint.y));
-    }    
-
-    function draw1(_eup) {
-        var rect = _eup.target.getBoundingClientRect();
-        var startpoint = new Point(_eup.clientX - rect.left, _eup.clientY - rect.top);
+    if(_eup.button == 0) {
+        var rect = _edown.target.getBoundingClientRect();
+        var startpoint = new Point(_edown.clientX - rect.left, _edown.clientY - rect.top);
         var isstartpointnew = true;
-        
+
         for(var point of points){
             if(startpoint.Distance(point) < 5){
-                startpoint = point;
+                startpoint = point;                 //  delete必要？
+                isstartpointnew = false;
                 break;
             }
         }
 
         if(isstartpointnew){
             points.push(startpoint);
-        }
-        
-        var radius = centerpoint.Distance(startpoint);
-        var direction = 1;
-        
-        canvas_xy_tmp.removeEventListener('mousemove', guide1);
-        canvas_xy_tmp.removeEventListener('mouseup', draw1);
-        canvas_xy_tmp.addEventListener('mousemove', guide2);
-        canvas_xy_tmp.addEventListener('mouseup', draw2);
+        }   
 
-        function guide2(_etmp) {
+        canvas_xy_tmp.addEventListener('mousemove', guide);
+        canvas_xy_tmp.addEventListener('mouseup', draw);
+
+        function guide(_etmp){
             ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
 
             var rect = _etmp.target.getBoundingClientRect();
-            var tmppoint = new Point(_etmp.clientX - rect.left, _etmp.clientY - rect.top);
-            var ratio = radius/centerpoint.Distance(tmppoint);
-            var endpoint = new Point(ratio*(_etmp.clientX - rect.left) + (1 - ratio)*centerpoint.x, ratio*(_etmp.clientY - rect.top) + (1 - ratio)*centerpoint.y);
+            var endpoint = new Point(_etmp.clientX - rect.left, _etmp.clientY - rect.top);
         
-            for(var point of points) {
+            for(var point of points){
                 if(endpoint.Distance(point) < 5){
                     endpoint = point;
-                    if(point == startpoint) {
-                        direction = !direction;
-                    }
                     break;
                 }
             }
-
-            var startangle = Math.atan2(startpoint.y - centerpoint.y, startpoint.x - centerpoint.x);
-            var endangle = Math.atan2(endpoint.y - centerpoint.y, endpoint.x - centerpoint.x);
-
+            
             ctx_xy_tmp.strokeStyle = "gold";
             ctx_xy_tmp.lineWidth = 2;
             ctx_xy_tmp.beginPath();
             ctx_xy_tmp.moveTo(startpoint.x, startpoint.y);
-            ctx_xy_tmp.lineTo(centerpoint.x, centerpoint.y);
-            ctx_xy_tmp.arc(centerpoint.x, centerpoint.y, radius, startangle, endangle, direction);
-            ctx_xy_tmp.moveTo(endpoint.x, endpoint.y);
-            ctx_xy_tmp.lineTo(centerpoint.x, centerpoint.y);
+            ctx_xy_tmp.lineTo(endpoint.x, endpoint.y);
             ctx_xy_tmp.stroke();
 
             ctx_xy_tmp.beginPath();
@@ -613,34 +458,20 @@ function drawcircle(_edown) {
             ctx_xy_tmp.arc(endpoint.x, endpoint.y, 2, 0, 2.0*Math.PI, 0);
             ctx_xy_tmp.stroke();
 
-            ctx_xy_tmp.beginPath();
-            ctx_xy_tmp.arc(centerpoint.x, centerpoint.y, 2, 0, 2.0*Math.PI, 0);
-            ctx_xy_tmp.stroke();
-
             ctx_xy_tmp.fillStyle = "gold";
             ctx_xy_tmp.font = "15px 'Times New Roman'";
             ctx_xy_tmp.textAlign = "left";
             ctx_xy_tmp.textBaseline = "top";
-            ctx_xy_tmp.fillText(centerpoint.Distance(startpoint).toFixed(2), 0.5*(centerpoint.x + startpoint.x), 0.5*(centerpoint.y + startpoint.y));
+            ctx_xy_tmp.fillText(startpoint.Distance(endpoint).toFixed(2), 0.5*(startpoint.x + endpoint.x), 0.5*(startpoint.y + endpoint.y));
+        }    
 
-            var dangle = endangle - startangle;
-            if(!direction && dangle < 0){
-                dangle += 2*Math.PI;
-            } else if(direction && dangle > 0){
-                dangle -= 2*Math.PI;
-            }
-            ctx_xy_tmp.fillText((180*dangle/Math.PI).toFixed(2), 0.5*(centerpoint.x + endpoint.x), 0.5*(centerpoint.y + endpoint.y));
-        }
-    
-        function draw2(_eup) {
+        function draw(_eup){
             ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
 
             var rect = _eup.target.getBoundingClientRect();
-            var tmppoint = new Point(_eup.clientX - rect.left, _eup.clientY - rect.top);
-            var ratio = radius/centerpoint.Distance(tmppoint);
-            var endpoint = new Point(ratio*(_eup.clientX - rect.left) + (1 - ratio)*centerpoint.x, ratio*(_eup.clientY - rect.top) + (1 - ratio)*centerpoint.y);
+            var endpoint = new Point(_eup.clientX - rect.left, _eup.clientY - rect.top);
             var isendpointnew = true;
-                    
+
             for(var point of points){
                 if(endpoint.Distance(point) < 5){
                     endpoint = point;
@@ -652,14 +483,201 @@ function drawcircle(_edown) {
             if(isendpointnew){
                 points.push(endpoint);
             }
+            
+            var line = new Line(startpoint, endpoint);
+            line.Draw(ctx_xy);
+            elements.push(line);
 
-            var circle = new Circle(startpoint, endpoint, centerpoint, direction);
-            circle.Draw(ctx_xy);
-            elements.push(circle);
+            canvas_xy_tmp.removeEventListener('mousemove', guide);
+            canvas_xy_tmp.removeEventListener('mouseup', draw);
+        }
+    } 
+}
 
-            canvas_xy_tmp.removeEventListener('mousemove', guide2);
-            canvas_xy_tmp.removeEventListener('mouseup', draw2);
-            canvas_xy_tmp.addEventListener('mousedown', drawcircle);
+
+//----------円描画のイベント----------
+function drawcircle(_edown) {
+    if(_edown.button == 0) {
+        var rect = _edown.target.getBoundingClientRect();
+        var centerpoint = new Point(_edown.clientX - rect.left, _edown.clientY - rect.top);
+        var iscenterpointnew = true;
+
+        for(var point of points){
+            if(centerpoint.Distance(point) < 5){
+                centerpoint = point;                        //  delete必要？
+                iscenterpointnew = false;
+                break;
+            }
+        }
+
+        if(iscenterpointnew){
+            points.push(centerpoint);
+        }   
+
+        canvas_xy_tmp.removeEventListener('mousedown', drawcircle);
+        canvas_xy_tmp.addEventListener('mousemove', guide1);
+        canvas_xy_tmp.addEventListener('mouseup', draw1);
+
+        function guide1(_etmp) {
+            ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
+
+            var rect = _etmp.target.getBoundingClientRect();
+            var edgepoint = new Point(_etmp.clientX - rect.left, _etmp.clientY - rect.top);
+        
+            for(var point of points) {
+                if(edgepoint.Distance(point) < 5){
+                    edgepoint = point;
+                    break;
+                }
+            }
+            
+            ctx_xy_tmp.strokeStyle = "gold";
+            ctx_xy_tmp.lineWidth = 2;
+            ctx_xy_tmp.beginPath();
+            ctx_xy_tmp.moveTo(centerpoint.x, centerpoint.y);
+            ctx_xy_tmp.lineTo(edgepoint.x, edgepoint.y);
+            ctx_xy_tmp.stroke();
+
+            ctx_xy_tmp.beginPath();
+            ctx_xy_tmp.arc(centerpoint.x, centerpoint.y, 2, 0, 2.0*Math.PI, 0);
+            ctx_xy_tmp.stroke();
+
+            ctx_xy_tmp.beginPath();
+            ctx_xy_tmp.arc(edgepoint.x, edgepoint.y, 2, 0, 2.0*Math.PI, 0);
+            ctx_xy_tmp.stroke();
+
+            ctx_xy_tmp.fillStyle = "gold";
+            ctx_xy_tmp.font = "15px 'Times New Roman'";
+            ctx_xy_tmp.textAlign = "left";
+            ctx_xy_tmp.textBaseline = "top";
+            ctx_xy_tmp.fillText(centerpoint.Distance(edgepoint).toFixed(2), 0.5*(centerpoint.x + edgepoint.x), 0.5*(centerpoint.y + edgepoint.y));
+        }    
+
+        function draw1(_eup) {
+            if(_eup.button == 0) {
+                var rect = _eup.target.getBoundingClientRect();
+                var startpoint = new Point(_eup.clientX - rect.left, _eup.clientY - rect.top);
+                var isstartpointnew = true;
+                
+                for(var point of points){
+                    if(startpoint.Distance(point) < 5){
+                        startpoint = point;
+                        break;
+                    }
+                }
+
+                if(isstartpointnew){
+                    points.push(startpoint);
+                }
+                
+                var radius = centerpoint.Distance(startpoint);
+                var direction = true;
+                
+                canvas_xy_tmp.removeEventListener('mousemove', guide1);
+                canvas_xy_tmp.removeEventListener('mouseup', draw1);
+                canvas_xy_tmp.addEventListener('mousemove', guide2);
+                canvas_xy_tmp.addEventListener('mouseup', draw2);
+                canvas_xy_tmp.addEventListener('mousedown', switchdirection);
+            }
+
+            function guide2(_etmp) {
+                ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
+
+                var rect = _etmp.target.getBoundingClientRect();
+                var tmppoint = new Point(_etmp.clientX - rect.left, _etmp.clientY - rect.top);
+                var ratio = radius/centerpoint.Distance(tmppoint);
+                var endpoint = new Point(ratio*(_etmp.clientX - rect.left) + (1 - ratio)*centerpoint.x, ratio*(_etmp.clientY - rect.top) + (1 - ratio)*centerpoint.y);
+            
+                for(var point of points) {
+                    if(endpoint.Distance(point) < 5){
+                        endpoint = point;
+                        break;
+                    }
+                }
+
+                var startangle = Math.atan2(startpoint.y - centerpoint.y, startpoint.x - centerpoint.x);
+                var endangle = Math.atan2(endpoint.y - centerpoint.y, endpoint.x - centerpoint.x);
+                if(direction && startangle <= endangle) {
+                    endangle -= 2*Math.PI;
+                } else if(!direction && startangle >= endangle) {
+                    endangle += 2*Math.PI;
+                }
+
+                ctx_xy_tmp.strokeStyle = "gold";
+                ctx_xy_tmp.lineWidth = 2;
+                ctx_xy_tmp.beginPath();
+                ctx_xy_tmp.moveTo(startpoint.x, startpoint.y);
+                ctx_xy_tmp.lineTo(centerpoint.x, centerpoint.y);
+                ctx_xy_tmp.arc(centerpoint.x, centerpoint.y, radius, startangle, endangle, direction);
+                ctx_xy_tmp.moveTo(endpoint.x, endpoint.y);
+                ctx_xy_tmp.lineTo(centerpoint.x, centerpoint.y);
+                ctx_xy_tmp.stroke();
+
+                ctx_xy_tmp.beginPath();
+                ctx_xy_tmp.arc(startpoint.x, startpoint.y, 2, 0, 2.0*Math.PI, 0);
+                ctx_xy_tmp.stroke();
+
+                ctx_xy_tmp.beginPath();
+                ctx_xy_tmp.arc(endpoint.x, endpoint.y, 2, 0, 2.0*Math.PI, 0);
+                ctx_xy_tmp.stroke();
+
+                ctx_xy_tmp.beginPath();
+                ctx_xy_tmp.arc(centerpoint.x, centerpoint.y, 2, 0, 2.0*Math.PI, 0);
+                ctx_xy_tmp.stroke();
+
+                ctx_xy_tmp.fillStyle = "gold";
+                ctx_xy_tmp.font = "15px 'Times New Roman'";
+                ctx_xy_tmp.textAlign = "left";
+                ctx_xy_tmp.textBaseline = "top";
+                ctx_xy_tmp.fillText(centerpoint.Distance(startpoint).toFixed(2), 0.5*(centerpoint.x + startpoint.x), 0.5*(centerpoint.y + startpoint.y));
+
+                var dangle = endangle - startangle;
+                if(!direction && dangle < 0){
+                    dangle += 2*Math.PI;
+                } else if(direction && dangle > 0){
+                    dangle -= 2*Math.PI;
+                }
+                ctx_xy_tmp.fillText((180*dangle/Math.PI).toFixed(2) + "deg", 0.5*(centerpoint.x + endpoint.x), 0.5*(centerpoint.y + endpoint.y));
+            }
+        
+            function draw2(_eup) {
+                if(_eup.button == 0) {
+                    ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
+
+                    var rect = _eup.target.getBoundingClientRect();
+                    var tmppoint = new Point(_eup.clientX - rect.left, _eup.clientY - rect.top);
+                    var ratio = radius/centerpoint.Distance(tmppoint);
+                    var endpoint = new Point(ratio*(_eup.clientX - rect.left) + (1 - ratio)*centerpoint.x, ratio*(_eup.clientY - rect.top) + (1 - ratio)*centerpoint.y);
+                    var isendpointnew = true;
+                            
+                    for(var point of points){
+                        if(endpoint.Distance(point) < 5){
+                            endpoint = point;
+                            isendpointnew = false;
+                            break;
+                        }
+                    }
+
+                    if(isendpointnew){
+                        points.push(endpoint);
+                    }
+
+                    var circle = new Circle(startpoint, endpoint, centerpoint, direction);
+                    circle.Draw(ctx_xy);
+                    elements.push(circle);
+
+                    canvas_xy_tmp.removeEventListener('mousemove', guide2);
+                    canvas_xy_tmp.removeEventListener('mouseup', draw2);
+                    canvas_xy_tmp.removeEventListener('mousedown', switchdirection);
+                    canvas_xy_tmp.addEventListener('mousedown', drawcircle);
+                }
+            }
+
+            function switchdirection(_echange) {
+                if(_echange.button == 2) {
+                    direction = !direction;
+                }
+            }
         }
     }
 }
