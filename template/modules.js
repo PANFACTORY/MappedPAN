@@ -217,25 +217,25 @@ function drawmesh(_canvas, _ctx, _meshs) {
 }
 
 
-//----------メッシング関数----------
-function mappedmeshing(_nxi, _nita, _pbx, _pby) {
+//----------楕円型メッシング関数----------
+function ellipticalmeshing(_nxi, _nita, _pb) {
     //----------Get range of value x, y----------
-    var xmin = _pbx[0];
-    var ymin = _pby[0];
-    var xmax = _pbx[0];
-    var ymax = _pby[0];
+    var xmin = _pb[0][0];
+    var ymin = _pb[0][1];
+    var xmax = _pb[0][0];
+    var ymax = _pb[0][1];
     for(var i = 0; i < 2*(_nxi + _nita); i++) {
-        if(xmin > _pbx[i]) {
-            xmin = _pbx[i];
+        if(xmin > _pb[i][0]) {
+            xmin = _pb[i][0];
         }
-        if(ymin > _pby[i]) {
-            ymin = _pby[i];
+        if(ymin > _pb[i][1]) {
+            ymin = _pb[i][1];
         }
-        if(xmax < _pbx[i]) {
-            xmax = _pbx[i];
+        if(xmax < _pb[i][0]) {
+            xmax = _pb[i][0];
         }
-        if(ymax > _pby[i]) {
-            ymax = _pby[i];
+        if(ymax > _pb[i][1]) {
+            ymax = _pb[i][1];
         }
     }
     var dx = (xmax - xmin)/_nxi;
@@ -256,26 +256,26 @@ function mappedmeshing(_nxi, _nita, _pbx, _pby) {
     var pbi = 0;
     //.....Bottom edge (η = 0).....
     for(var i = 0; i < _nxi; i++, pbi++){
-        pin[i][0][0] = _pbx[pbi];
-        pin[i][0][1] = _pby[pbi];
+        pin[i][0][0] = _pb[pbi][0];
+        pin[i][0][1] = _pb[pbi][1];
     }
 
     //.....Right edge (ξ = ξmax).....
     for(var j = 0; j < _nita; j++, pbi++){
-        pin[_nxi][j][0] = _pbx[pbi];
-        pin[_nxi][j][1] = _pby[pbi];
+        pin[_nxi][j][0] = _pb[pbi][0];
+        pin[_nxi][j][1] = _pb[pbi][1];
     }
 
     //.....Top edge (η = ηmax).....
     for(var i = _nxi; i > 0; i--, pbi++){
-        pin[i][_nita][0] = _pbx[pbi];
-        pin[i][_nita][1] = _pby[pbi];
+        pin[i][_nita][0] = _pb[pbi][0];
+        pin[i][_nita][1] = _pb[pbi][1];
     }
 
     //.....Left edge (ξ = 0).....
     for(var j = _nita; j > 0; j--, pbi++){
-        pin[0][j][0] = _pbx[pbi];
-        pin[0][j][1] = _pby[pbi];
+        pin[0][j][0] = _pb[pbi][0];
+        pin[0][j][1] = _pb[pbi][1];
     }
 
     //----------Solve Laplace equation----------
@@ -872,17 +872,15 @@ function meshing(_edown){
 
         //----------閉曲線ならメッシュを生成----------
         if(isclosedpath) {
-            var pbx = new Array();
-            var pby = new Array();
+            var pb = new Array();
             var pbn = [Number(input_nxi.value), Number(input_nita.value), Number(input_nxi.value), Number(input_nita.value)]
             for(var i = 0; i < paths.length; i++) {
                 var points = paths[i].generatePointOnEdge(pbn[i], elementdirections[i]);
                 for(var point of points){
-                    pbx.push(point[0]);
-                    pby.push(point[1]);
+                    pb.push(point);
                 }
             }
-            meshs = mappedmeshing(Number(input_nxi.value), Number(input_nita.value), pbx, pby);
+            meshs = ellipticalmeshing(Number(input_nxi.value), Number(input_nita.value), pb);
             drawmesh(canvas_xy_mesh, ctx_xy_mesh, meshs);
         }
     }
@@ -954,7 +952,6 @@ function downloadmesh() {
     var celldata = "\nCELLS " + ((nxi - 1)*(nita - 1)) + "\t" + (5*(nxi - 1)*(nita - 1)) + "\n";
     for (var i = 0; i < nxi - 1; i++) {
 		for (var j = 0; j < nita - 1; j++) {
-            //celldata += "4 " + (nita*i + j) + "\t" + (nita*i + j + 1) + "\t" + (nita*(i + 1) + j + 1) + "\t" + (nita*(i + 1) + j) + "\n";
             celldata += "4 " + pointids[i][j] + "\t" + pointids[i][j + 1] + "\t" + pointids[i + 1][j + 1] + "\t" + pointids[i + 1][j] + "\n";
 		}
     }
