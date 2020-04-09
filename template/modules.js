@@ -479,6 +479,14 @@ function drawline(_edown){
 
             var rect = _etmp.target.getBoundingClientRect();
             var endpoint = new Point(_etmp.clientX - rect.left, _etmp.clientY - rect.top);
+
+            if (_etmp.shiftKey) {
+                if(Math.abs(endpoint.x - startpoint.x) > Math.abs(endpoint.y - startpoint.y)) {
+                    endpoint.y = startpoint.y;
+                } else {
+                    endpoint.x = startpoint.x;
+                }
+            }
         
             for(var point of points){
                 if(endpoint.Distance(point) < 5){
@@ -522,6 +530,14 @@ function drawline(_edown){
                 var rect = _eup.target.getBoundingClientRect();
                 var endpoint = new Point(_eup.clientX - rect.left, _eup.clientY - rect.top);
                 var isendpointnew = true;
+
+                if (_eup.shiftKey) {
+                    if(Math.abs(endpoint.x - startpoint.x) > Math.abs(endpoint.y - startpoint.y)) {
+                        endpoint.y = startpoint.y;
+                    } else {
+                        endpoint.x = startpoint.x;
+                    }
+                }
 
                 for(var point of points){
                     if(endpoint.Distance(point) < 5){
@@ -574,11 +590,19 @@ function drawcircle(_edown) {
             ctx_xy_tmp.clearRect(0, 0, canvas_xy.width, canvas_xy.height);
 
             var rect = _etmp.target.getBoundingClientRect();
-            var edgepoint = new Point(_etmp.clientX - rect.left, _etmp.clientY - rect.top);
+            var startpoint = new Point(_etmp.clientX - rect.left, _etmp.clientY - rect.top);
+
+            if (_etmp.shiftKey) {
+                if(Math.abs(startpoint.x - centerpoint.x) > Math.abs(startpoint.y - centerpoint.y)) {
+                    startpoint.y = centerpoint.y;
+                } else {
+                    startpoint.x = centerpoint.x;
+                }
+            }
         
             for(var point of points) {
-                if(edgepoint.Distance(point) < 5){
-                    edgepoint = point;
+                if(startpoint.Distance(point) < 5){
+                    startpoint = point;
                     break;
                 }
             }
@@ -587,7 +611,7 @@ function drawcircle(_edown) {
             ctx_xy_tmp.lineWidth = 2;
             ctx_xy_tmp.beginPath();
             ctx_xy_tmp.moveTo(centerpoint.x, centerpoint.y);
-            ctx_xy_tmp.lineTo(edgepoint.x, edgepoint.y);
+            ctx_xy_tmp.lineTo(startpoint.x, startpoint.y);
             ctx_xy_tmp.stroke();
 
             ctx_xy_tmp.beginPath();
@@ -595,12 +619,12 @@ function drawcircle(_edown) {
             ctx_xy_tmp.stroke();
 
             ctx_xy_tmp.beginPath();
-            ctx_xy_tmp.arc(edgepoint.x, edgepoint.y, 2, 0, 2.0*Math.PI, 0);
+            ctx_xy_tmp.arc(startpoint.x, startpoint.y, 2, 0, 2.0*Math.PI, 0);
             ctx_xy_tmp.stroke();
 
             ctx_xy_tmp.fillStyle = "gold";
             ctx_xy_tmp.font = "15px 'Times New Roman'";
-            var angle = Math.atan2(edgepoint.y - centerpoint.y, edgepoint.x - centerpoint.x);
+            var angle = Math.atan2(startpoint.y - centerpoint.y, startpoint.x - centerpoint.x);
             if(angle < 0) {
                 angle += 2*Math.PI;
             }
@@ -611,7 +635,7 @@ function drawcircle(_edown) {
                 ctx_xy_tmp.textAlign = "left";
                 ctx_xy_tmp.textBaseline = "top";
             }
-            ctx_xy_tmp.fillText(centerpoint.Distance(edgepoint).toFixed(2) + "(" + (180*angle/Math.PI).toFixed(2) + "deg)", 0.5*(centerpoint.x + edgepoint.x), 0.5*(centerpoint.y + edgepoint.y));
+            ctx_xy_tmp.fillText(centerpoint.Distance(startpoint).toFixed(2) + "(" + (180*angle/Math.PI).toFixed(2) + "deg)", 0.5*(centerpoint.x + startpoint.x), 0.5*(centerpoint.y + startpoint.y));
         }    
 
         function draw1(_eup) {
@@ -619,6 +643,14 @@ function drawcircle(_edown) {
                 var rect = _eup.target.getBoundingClientRect();
                 var startpoint = new Point(_eup.clientX - rect.left, _eup.clientY - rect.top);
                 var isstartpointnew = true;
+
+                if (_eup.shiftKey) {
+                    if(Math.abs(startpoint.x - centerpoint.x) > Math.abs(startpoint.y - centerpoint.y)) {
+                        startpoint.y = centerpoint.y;
+                    } else {
+                        startpoint.x = centerpoint.x;
+                    }
+                }
                 
                 for(var point of points){
                     if(startpoint.Distance(point) < 5){
